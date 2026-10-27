@@ -29,12 +29,15 @@ try {
     & $java '-Djava.awt.headless=true' '-Dswing.aatext=true' '-Dawt.useSystemAAFontSettings=on' ('-javaagent:'+$agent) '-cp' $cp DocumentationViews $images
     Assert-Exit 'Documentation views'
 } finally { $env:APPDATA = $oldAppData }
-$start = [Diagnostics.ProcessStartInfo]::new((Join-Path $repo 'dist\SQLDeveloperConfigurator.exe'))
-$start.Arguments = '--smoke-test "'+(Join-Path $images 'configurator.png')+'" "'+(Join-Path $output 'documentation-wpf-appdata')+'"'
-$start.UseShellExecute = $false; $start.CreateNoWindow = $true
-$process = [Diagnostics.Process]::Start($start)
-if (!$process.WaitForExit(60000)) { throw 'WPF render did not finish within 60 seconds.' }
-if ($process.ExitCode -ne 0) { throw 'WPF render failed; inspect docs/images/configurator.png.txt.' }
+$framework = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
+$binary = Join-Path $repo 'dist\SQLDeveloperConfigurator.exe'
+$references = @('System.dll','System.Core.dll','System.Xaml.dll','WPF\WindowsBase.dll','WPF\PresentationCore.dll','WPF\PresentationFramework.dll') | ForEach-Object { '/reference:'+(Join-Path $framework $_) }
+$renderer = Join-Path $output 'DocumentationWindow.exe'
+& (Join-Path $framework 'csc.exe') '/nologo' '/target:exe' '/codepage:65001' ('/out:'+$renderer) @references ('/reference:'+$binary) (Join-Path $repo 'tests\DocumentationWindow.cs')
+Assert-Exit 'WPF documentation renderer compilation'
+Copy-Item -LiteralPath $binary -Destination (Join-Path $output 'SQLDeveloperConfigurator.exe') -Force
+& $renderer $binary (Join-Path $images 'configurator.png') $sdk
+Assert-Exit 'WPF documentation rendering'
 Copy-Item -LiteralPath (Join-Path $output 'Font50.png') -Destination (Join-Path $images 'icon.png') -Force
 if ($SqlDeveloperProcessId -gt 0) {
     $app = Get-Process -Id $SqlDeveloperProcessId -ErrorAction Stop

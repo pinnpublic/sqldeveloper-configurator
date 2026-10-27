@@ -14,7 +14,9 @@ public final class DocumentationViews {
     static void layout(Container parent){parent.doLayout();for(Component child:parent.getComponents())if(child instanceof Container next)layout(next);}
     static void save(JComponent component,int width,int height,Path path)throws Exception{
         component.setSize(width,height);layout(component);
-        BufferedImage image=new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);Graphics2D g=image.createGraphics();
+        BufferedImage image=new BufferedImage(width*2,height*2,BufferedImage.TYPE_INT_RGB);Graphics2D g=image.createGraphics();
+        g.scale(2,2);g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
         g.setColor(Color.WHITE);g.fillRect(0,0,width,height);component.printAll(g);g.dispose();ImageIO.write(image,"png",path.toFile());
     }
     public static void main(String[]args)throws Exception{
@@ -28,7 +30,7 @@ public final class DocumentationViews {
                 BasicEditorPane editor=new BasicEditorPane();editor.setBaseFont("JetBrainsMonoHangul NL",28);
                 JScrollPane scroll=new JScrollPane(editor);scroll.setSize(900,450);scroll.doLayout();
                 scroll.getViewport().setExtentSize(new Dimension(875,420));editor.setSize(875,420);editor.getUI().getRootView(editor).setSize(875,420);
-                editor.setText("select '긴 SQL은 화면 너비에 맞춰 표시할 때만 줄바꿈됩니다. ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789' as sample_text from dual;\n\n---\n\nselect '안녕하세요. --- 입니다' as ordinary_text\nfrom dual;\n");
+                editor.setText("select id, name, created_at, status, description, updated_at from sample_table where status = 'ACTIVE' order by created_at desc;\n\n---\n\nselect '안녕하세요. --- 입니다' as message\nfrom dual;\n");
                 EditorBridge.configureEditor(editor,true,true,2,0x6F8296,"solid");
                 editor.getCaret().setVisible(false);save(editor,875,420,directory.resolve("editor-wrap.png"));
                 JPanel rules=new JPanel(new GridLayout(4,1,0,6));rules.setBackground(Color.WHITE);

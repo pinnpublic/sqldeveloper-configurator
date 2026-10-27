@@ -1,124 +1,75 @@
-<p align="center">
-  <img src="docs/images/icon.png" width="96" alt="SQL Developer Configurator 아이콘">
-</p>
+<p align="center"><img src="docs/images/icon.png" width="80" alt=""></p>
 
 # SQL Developer Configurator
 
-**Oracle SQL Developer의 큰 글꼴, 결과셋 셀 여백, 자동 줄바꿈, 수평 구분선을 설정하는 Windows 도구입니다.**
+Oracle SQL Developer에서 **큰 글꼴을 편하게 사용하고, 긴 SQL을 읽기 쉽게 표시**하는 설정 도구입니다.
 
-SQL 편집기와 결과셋의 글꼴을 최대 **50pt**까지 사용하고, 커진 결과셋 글자가 위아래 셀 경계에 잘리지 않도록 행 높이를 조정합니다. 긴 SQL은 원문을 바꾸지 않고 화면에서만 줄바꿈하며, `---`만 있는 줄은 원하는 모양의 수평선으로 표시할 수 있습니다.
+- SQL 편집기·결과셋 글꼴을 **최대 50pt**로 설정
+- 결과셋 글자가 위아래로 잘리지 않도록 **행 높이와 셀 여백 조절**
+- 편집기 너비에 맞춘 **자동 줄바꿈**
+- `---` 단독 줄을 **수평 구분선**으로 표시하고 두께·색상·모양 설정
 
-설정 도구는 **C# + WPF**, SQL Developer 내부 기능은 **Java 에이전트**로 구성되어 있습니다. SQL Developer 설치 위치를 자동으로 찾으며, 다른 PC에서는 실행 파일 하나를 복사해 적용할 수 있습니다.
+**[실행 파일 다운로드](https://github.com/pinnpublic/sqldeveloper-configurator/releases/latest/download/SQLDeveloperConfigurator.exe)** · [전체 다운로드](https://github.com/pinnpublic/sqldeveloper-configurator/releases/latest)
 
-**현재 버전:** 3.4.0 · **지원:** Windows / SQL Developer 26.2.0.186.2220 · **라이선스:** MIT
+지원 환경: **Windows 10/11 · SQL Developer 26.2.0.186.2220 · .NET Framework 4.8 · Java 17 이상**. Java는 SQL Developer에 포함된 것을 사용할 수 있습니다. Java 기반 데스크톱판용입니다.
 
-## 주요 기능
+## 1. 처음 적용하기
 
-| 기능 | 설명 |
+1. 위 링크에서 **SQLDeveloperConfigurator.exe**를 내려받습니다.
+2. SQL 작업을 저장하고 **SQL Developer를 종료**합니다.
+3. Configurator를 실행합니다. 설치 위치는 자동 검색됩니다.
+4. 적용할 설치본을 선택하고 글꼴 크기와 여백을 정합니다.
+5. **적용**을 누른 뒤 **SQL Developer 실행**을 누릅니다.
+
+설치본이 검색되지 않으면 **직접 선택**에서 `sqldeveloper.exe`를 선택하세요. 선택한 위치는 다음 실행에도 기억됩니다.
+
+<a href="docs/images/configurator.png"><img src="docs/images/configurator.png" width="880" alt="설치 위치와 글꼴 크기, 결과셋 여백을 설정하는 Configurator 화면"></a>
+
+## 2. 글꼴 크기와 결과셋 여백
+
+Configurator에서 다음 항목을 설정하고 **적용**합니다. 변경할 때는 SQL Developer를 먼저 종료하세요.
+
+| 항목 | 사용 방법 |
 | --- | --- |
-| SQL 편집기 글꼴 | 7~50pt 설정, SQL Developer의 기존 글꼴 크기 목록 확장 |
-| 결과셋 글꼴 | 6~50pt, PC에 설치된 글꼴 선택 |
-| 결과셋 셀 여백 | 위·아래 각각 -20~30px, 글꼴 크기에 맞춰 행 높이 조절 |
-| 첫 표시부터 적용 | 결과표가 표시된 뒤 늦게 커지는 현상을 줄이도록 표시·변경 이벤트에서 적용 |
-| 기본 선택 동작 유지 | Oracle 기본 셀 렌더러를 유지하며 행 번호/본문 셀의 선택 동작을 보존 |
-| 자동 줄바꿈 | 편집기 너비에 맞춰 표시. 실제 SQL 개행이나 파일 내용은 변경하지 않음 |
-| 수평 구분선 | `---` 단독 줄을 수평선으로 표시. 원래 세 하이픈은 화면에서 숨김 |
-| 수평선 사용자 설정 | 두께 0.5~8px, 색상, 실선·파선·점선·일점쇄선 |
-| Developer 환경설정 | **도구 → 환경설정 → 코드 편집기 → 자동 줄바꿈 · 수평선** |
-| 설치 경로 자동 검색 | 실행 중인 설치본, 실행 파일 주변, 기억한 경로 및 일반 설치 위치 검색 |
-| 백업과 복구 | 원본 파일과 설정 백업, 재적용 및 원본 복구 지원 |
+| SQL 편집기 크기 | **7~50pt** 중 선택 |
+| 결과셋 크기 | **6~50pt** 중 선택 |
+| 결과셋 글꼴 | 설치된 글꼴을 선택하거나 **편집기 글꼴 따르기** 사용 |
+| 상단 / 하단 여백 | **-20~30px**. 선택한 값이 위·아래에 각각 적용됨 |
+| 열 제목에도 적용 | 결과표의 열 제목에도 글꼴 설정 적용 |
 
-> 이 프로젝트는 Java 기반 **SQL Developer 데스크톱 프로그램**용입니다. VS Code용 SQL Developer 확장에는 적용되지 않습니다. 지원 빌드와 원본 파일 해시가 맞지 않으면 적용을 중단합니다.
+큰 글꼴은 **여백 8px**부터 사용해 보세요. 여백을 늘리면 행이 높아지고, 줄이면 더 많은 행을 볼 수 있습니다. 음수 값으로 너무 좁히면 글자가 잘릴 수 있습니다. 긴 값이 가로로 잘리면 열 제목 사이의 경계를 끌어 열 너비를 넓히세요.
 
-## 화면과 렌더링 예시
+**50pt · 위아래 여백 8px 예시**
 
-아래 이미지는 **실제 제품 UI 코드와 Oracle 컴포넌트**를 사용해 생성했습니다. 작성 중인 SQL, 접속 정보, DB 데이터는 포함하지 않았습니다. 기능 예시의 SQL과 행 데이터는 문서용 테스트 입력이며, 실제 DB 쿼리 결과로 표시한 것이 아닙니다. 생성 방법은 [이미지 안내](docs/SCREENSHOTS.md)를 참고하세요.
+<a href="docs/images/results-50pt.png"><img src="docs/images/results-50pt.png" width="880" alt="50pt 글꼴과 위아래 8px 여백을 적용한 결과표 예시"></a>
 
-### 설정 도구
+편집기 글꼴은 SQL Developer의 **도구 → 환경설정 → 코드 편집기 → 글꼴**에서도 바꿀 수 있습니다.
 
-![SQL Developer Configurator 설정 도구](docs/images/configurator.png)
+## 3. 자동 줄바꿈
 
-WPF 설정 도구의 실제 화면 내용을 창 전환 없이 렌더링한 이미지입니다. 글꼴 크기, 결과셋 여백, 자동 검색 및 적용·복구 기능을 제공합니다.
+1. SQL Developer에서 **도구 → 환경설정**을 엽니다.
+2. **코드 편집기 → 자동 줄바꿈 · 수평선**을 선택합니다.
+3. **자동 줄바꿈 사용**을 체크하고 **확인**을 누릅니다.
 
-### SQL Developer 환경설정
+<a href="docs/images/preferences.png"><img src="docs/images/preferences.png" width="650" alt="자동 줄바꿈 사용과 수평선 두께·모양·색상을 설정하는 환경설정"></a>
 
-![자동 줄바꿈과 수평선 환경설정 패널](docs/images/preferences.png)
+긴 SQL이 편집기 너비에 맞춰 이어서 표시됩니다. 저장되는 SQL에 개행을 추가하지 않습니다. 체크를 해제하면 가로 스크롤 방식으로 돌아갑니다.
 
-**도구 → 환경설정 → 코드 편집기 → 자동 줄바꿈 · 수평선**에서 사용하는 실제 Oracle 환경설정 패널의 렌더링입니다. 자동 줄바꿈과 수평선을 각각 켜거나 끌 수 있습니다.
+<a href="docs/images/editor-wrap.png"><img src="docs/images/editor-wrap.png" width="875" alt="긴 SQL의 자동 줄바꿈과 단독 줄 수평선 예시"></a>
 
-### 자동 줄바꿈과 수평선
+## 4. 수평 구분선
 
-![Oracle 편집기의 자동 줄바꿈 및 수평선 예시](docs/images/editor-wrap.png)
+같은 환경설정에서 **`---`만 있는 줄에 수평선 표시**를 체크합니다.
 
-실제 Oracle 편집기에 예제 SQL을 넣어 렌더링했습니다. `---`만 있는 줄에는 선이 표시되며, `'안녕하세요. --- 입니다'`처럼 다른 문자가 있는 줄은 일반 텍스트로 남습니다.
-
-### 수평선 모양
-
-![실선, 파선, 점선, 일점쇄선](docs/images/rule-styles.png)
-
-동일한 `---` 줄에 수평선 모양 옵션을 각각 적용한 Oracle 편집기 렌더링입니다.
-
-### 50pt 결과셋
-
-![실제 Oracle 결과표 렌더러의 50pt 글꼴과 셀 여백](docs/images/results-50pt.png)
-
-실행 중인 SQL Developer의 **실제 `ResultSetTable`과 기본 렌더러**를 사용한 문서용 예시입니다. 메모리에 만든 세 행에 50pt 글꼴과 위·아래 8px 여백을 적용했습니다. 데이터베이스에 접속하거나 쿼리를 실행하지 않았습니다.
-
-## 사용 환경
-
-| 구분 | 필요 조건 |
+| 설정 | 선택 범위 |
 | --- | --- |
-| 운영체제 | Windows 10/11, 64비트 환경 |
-| SQL Developer | **26.2.0.186.2220** |
-| Java 실행 환경 | Java 17 이상. SQL Developer에 포함된 Java를 우선 사용 |
-| 설정 도구 실행 | .NET Framework 4.8 |
-| 글꼴 | 사용할 글꼴이 해당 PC에 설치되어 있어야 함 |
+| 선 두께 | **0.5~8px** |
+| 선 색상 | **색상 선택** 버튼 또는 `#RRGGBB` 입력 |
+| 선 모양 | **실선 · 파선 · 점선 · 일점쇄선** |
 
-일반 사용자는 JDK, Visual Studio, .NET SDK 또는 PowerShell 스크립트를 따로 사용할 필요가 없습니다. 소스에서 빌드할 때만 JDK가 필요합니다.
+<a href="docs/images/rule-styles.png"><img src="docs/images/rule-styles.png" width="875" alt="실선, 파선, 점선, 일점쇄선의 모양 비교"></a>
 
-## 설치와 처음 사용하기
-
-1. [Releases](../../releases)에서 `SQLDeveloperConfigurator.exe`를 내려받거나 아래 빌드 방법으로 실행 파일을 만듭니다.
-2. 작업 중인 SQL을 저장하고 **SQL Developer를 종료**합니다.
-3. `SQLDeveloperConfigurator.exe`를 실행합니다.
-4. 자동으로 검색된 설치 위치와 버전을 확인합니다. 여러 개면 적용할 설치본을 선택합니다.
-5. SQL 편집기 크기, 결과셋 크기, 결과셋 글꼴과 상단/하단 여백을 선택합니다.
-6. **적용**을 누릅니다. 도구가 원본과 설정을 백업하고 필요한 파일을 적용합니다.
-7. **SQL Developer 실행**을 누릅니다.
-
-설치 위치를 자동으로 찾지 못하면 **직접 선택**에서 `sqldeveloper.exe`를 한 번 선택하세요. 선택한 경로는 기억됩니다.
-
-업데이트할 때도 Developer를 종료하고 새 실행 파일에서 **적용**을 누르면 됩니다. 기존 원본 백업은 유지됩니다. 설치 파일을 교체하는 작업이므로 Developer 실행 중에는 적용·복구를 진행하지 않습니다.
-
-### 다른 PC에 적용하기
-
-`SQLDeveloperConfigurator.exe` 하나를 복사해 위 과정을 반복하면 됩니다. 별도 Java JAR이나 설정 스크립트를 직접 배치할 필요가 없습니다. 각 PC에 지원되는 SQL Developer와 필요한 런타임이 설치되어 있어야 하며, 글꼴 파일은 함께 배포하지 않습니다.
-
-## 기능별 사용법
-
-### 큰 글꼴과 결과셋 셀 여백
-
-설정 도구에서 글꼴 크기와 여백을 선택하고 **적용**한 뒤 Developer를 실행합니다.
-
-- 편집기 글꼴 크기는 Developer의 **환경설정 → 코드 편집기 → 글꼴**에서도 선택할 수 있습니다.
-- 결과셋의 상단/하단 여백은 **각 방향의 값**입니다. `8`이면 위 8px, 아래 8px입니다.
-- 큰 글꼴에는 양수 여백을 사용하세요. 기본값은 8px입니다.
-- 음수 여백은 행을 더 좁게 만들기 위한 옵션입니다. 값을 지나치게 줄이면 글자가 잘릴 수 있습니다.
-- 행 번호를 누르면 한 행, 본문 셀을 누르면 한 셀을 선택하는 기존 Oracle 동작을 사용합니다.
-
-이 기능은 큰 글꼴의 **세로 잘림**을 줄이도록 행 높이를 조절합니다. 긴 값의 가로 표시 범위는 기존 결과표와 마찬가지로 열 너비를 조정해 사용합니다.
-
-### 자동 줄바꿈
-
-1. Developer에서 **도구 → 환경설정 → 코드 편집기 → 자동 줄바꿈 · 수평선**을 엽니다.
-2. **자동 줄바꿈 사용**을 선택합니다.
-3. **확인** 또는 **적용**을 누릅니다.
-
-열린 편집기에 바로 반영됩니다. 화면 너비에 맞춰 보이는 줄만 바꾸며 실제 파일에 개행을 넣지 않습니다. 해제하면 기존 가로 표시 방식으로 돌아갑니다.
-
-### `---` 수평선
-
-같은 환경설정에서 **`---`만 있는 줄에 수평선 표시**를 선택하고 두께·색상·모양을 설정합니다. 색상은 `#RRGGBB`로 입력하거나 색상 선택 창에서 고를 수 있습니다.
+SQL 편집기에서 한 줄에 `---`만 입력하면 가로 영역을 잇는 선으로 보입니다. 하이픈 문자는 화면에서 숨겨지며, 저장·복사할 때는 원래 `---`가 유지됩니다.
 
 ```sql
 select 1 from dual;
@@ -128,129 +79,36 @@ select 1 from dual;
 select 2 from dual;
 ```
 
-중간의 `---` 단독 줄이 편집기의 보이는 가로 영역을 잇는 선으로 표시됩니다. **원래 하이픈 문자는 화면에서 숨깁니다.**
+- 앞뒤에 공백이나 탭이 있어도 표시합니다.
+- `안녕하세요. --- 입니다`, `--- 설명`, `----`처럼 다른 내용이 있으면 표시하지 않습니다.
+- 문자열이나 블록 주석 안에서는 표시하지 않습니다.
 
-| 입력 조건 | 수평선 표시 |
+**선을 지우려면** 해당 줄에서 하이픈 하나를 지워 `--`로 만들거나 줄을 삭제하세요. 기능을 끄면 원래 하이픈 문자가 다시 보입니다.
+
+자동 줄바꿈과 수평선 설정은 **확인 / 적용**을 누르면 열린 편집기에 반영됩니다. **취소**하면 변경 사항을 저장하지 않습니다.
+
+## 5. 다른 PC · 업데이트 · 원본 복구
+
+| 작업 | 순서 |
 | --- | --- |
-| `---`만 있는 줄 | 표시 |
-| 앞뒤에 공백 또는 탭이 있는 `---` 단독 줄 | 표시 |
-| `안녕하세요. --- 입니다` | 표시하지 않음 |
-| `--- 설명`, `설명 ---`, `----` | 표시하지 않음 |
-| 문자열·인용 식별자·블록 주석 안의 `---` | 표시하지 않음 |
+| 다른 PC에서 사용 | 실행 파일 하나를 복사 → 실행 → 설치본 선택 → **적용** |
+| 새 버전으로 업데이트 | SQL Developer 종료 → 새 Configurator 실행 → **적용** |
+| 원본으로 되돌리기 | SQL Developer 종료 → Configurator 실행 → **원본 복구** |
 
-**선 삭제:** 해당 줄에서 하이픈 하나를 지워 `--`로 만들거나, 줄 자체를 삭제하면 선도 사라집니다. 다른 문자를 같은 줄에 추가해도 수평선 표시가 해제됩니다.
+적용 전 원본과 설정을 자동 백업합니다. 다른 PC에서도 같은 글꼴을 쓰려면 해당 글꼴을 설치하세요.
 
-표시 방식만 바꾸므로 저장·복사되는 SQL 원문에는 `---`가 유지됩니다. 수평선 기능을 끄면 원래 문자도 다시 보입니다. 환경설정에서 **취소**하면 변경 사항은 저장하지 않습니다.
+## 자주 묻는 질문
 
-### 원본으로 되돌리기
-
-Developer를 종료하고 Configurator에서 **원본 복구**를 누르세요. 원래 편집기 파일, 확장 등록, 시작 옵션 및 백업한 사용자 설정을 복구합니다. 다른 변경 사항을 덮어쓰지 않도록 파일 상태가 예상과 다르면 중단합니다.
-
-## 소스에서 빌드하기
-
-Oracle 설치 파일은 저장소에 포함되어 있지 않습니다. **별도로 설치한 SQL Developer를 빌드 시 API 참조로 사용**합니다.
-
-필요한 도구:
-
-- Windows와 .NET Framework 4.8의 C# 컴파일러
-- **JDK 17 또는 21**의 `java`, `javac`, `jar`
-- SQL Developer 26.2.0.186.2220 설치본
-- Windows PowerShell 5.1 또는 PowerShell 7
-
-```powershell
-# JAVA_HOME 또는 PATH에서 JDK를 찾습니다.
-.\build.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper"
-
-# JDK 위치를 명시할 수도 있습니다.
-.\build.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper" -JdkPath "C:\tools\jdk-21"
-```
-
-스크립트 실행 정책에 막히면 현재 명령에 한해 다음과 같이 실행할 수 있습니다.
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper"
-```
-
-빌드 결과:
-
-```text
-dist/
-├─ SQLDeveloperConfigurator.exe
-└─ SHA256SUMS.txt
-```
-
-Java 에이전트와 패처도 저장소 소스에서 직접 컴파일해 실행 파일에 내장합니다. Oracle JAR이나 JDK를 배포 파일로 복사하지 않습니다. 앱 아이콘도 소스 코드로 생성합니다.
-
-### 테스트
-
-```powershell
-.\test.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper"
-
-# 이미 빌드한 결과 사용
-.\test.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper" -NoBuild
-```
-
-테스트는 `out/` 아래의 임시 설치본·설정 폴더에서 진행합니다. 실행 중인 Developer의 SQL, DB 및 사용자 설정을 변경하지 않습니다.
-
-검사 항목:
-
-- 50pt 설정 저장, 음수/양수 여백 범위, 한글·공백 경로
-- 설치, 재적용, 원본 백업 유지 및 복구
-- 결과셋 행 높이, 선택된 셀, 행 번호, 원래 렌더러 유지
-- 실제 Oracle 편집기의 줄바꿈, 창 크기 변경, 커서 좌표, 선택·복사, 삽입·삭제
-- 수평선 표시 조건, 네 가지 모양, `---` 숨김 및 하이픈 삭제 시 선 제거
-- 실제 Oracle 환경설정 패널의 읽기·적용·취소와 입력값 검증
-
-실행 중인 Developer에서도 별도로 **실제 코드 편집기 하위 항목, 왼쪽 트리 생성, 설정 화면 로딩**을 검증했습니다. SQL Developer 전용 편집기 트리는 일반 편집기 목록과 경로가 다르므로, 트리의 실제 자식 생성 경로에 연결합니다.
-
-실행 중인 설치본에서 이 검사를 다시 수행하려면 다음 스크립트를 사용합니다. 설정 목록과 분리된 패널을 API로 검사하며, 화면 입력이나 문서 변경은 하지 않습니다.
-
-```powershell
-.\scripts\verify-live.ps1 -SqlDeveloperPath "C:\dev\sqldeveloper" -SqlDeveloperProcessId 12345
-```
-
-## 소스 구성
-
-```text
-src/
-├─ wpf/                    # 설정 도구, 자동 검색, 백업·적용·복구, 아이콘
-└─ java/
-   ├─ agent/               # 결과표 스타일, 환경설정 패널 및 트리 연결
-   ├─ bootstrap/           # Oracle 편집기 표시·좌표 어댑터
-   ├─ instrumentation/     # 편집기와 실제 환경설정 트리의 메서드 연결
-   └─ patcher/             # 50pt 글꼴 크기 제한 변경
-tests/                     # C# 및 Java 테스트, 문서용 렌더러
-scripts/                   # 공통 빌드 함수, 이미지 생성, 소스 배포
-docs/                      # 이미지 설명과 예제 SQL
-build.ps1
-test.ps1
-```
-
-기존 버전과의 호환을 위해 내부 네임스페이스와 사용자 설정 폴더에는 `Font50` 이름을 유지합니다. 화면의 제품명과 새 배포 파일 이름은 **SQL Developer Configurator**입니다.
-
-## 문제 해결
-
-| 증상 | 확인할 사항 |
+| 증상 | 해결 방법 |
 | --- | --- |
-| 설치본을 찾지 못함 | **직접 선택**에서 `sqldeveloper.exe` 선택 |
-| 적용/복구가 거절됨 | Developer 종료 여부, 지원 빌드 및 원본 파일 상태 확인 |
-| 환경설정 항목이 안 보임 | 새 도구에서 적용 후 Developer 재실행. 설정은 **코드 편집기 바로 아래**에 있음 |
-| 결과셋 글자가 잘림 | 양수 여백으로 늘리고 적용·재실행. 가로 잘림이면 열 너비 조정 |
-| 다른 PC에서 글꼴이 다름 | 해당 PC에 글꼴을 설치하거나 설치된 다른 글꼴 선택 |
-| 설치 폴더 쓰기 권한 오류 | 쓰기 가능한 위치인지 확인. 필요한 경우 Configurator를 관리자 권한으로 실행 |
-| 빌드 시 JDK를 못 찾음 | JRE가 아닌 JDK를 설치하고 `JAVA_HOME`, `PATH` 또는 `-JdkPath` 지정 |
+| 환경설정 메뉴가 보이지 않아요 | Configurator에서 **적용**한 뒤 SQL Developer를 다시 실행하세요. **코드 편집기 바로 아래**에 있습니다. |
+| 결과셋 글자가 위아래로 잘려요 | Configurator의 **상단 / 하단 여백**을 늘리고 다시 적용하세요. |
+| 설치 위치를 못 찾아요 | **직접 선택**에서 설치 폴더의 `sqldeveloper.exe`를 선택하세요. |
+| 적용 또는 복구를 못 해요 | SQL Developer가 종료되어 있는지, 지원 버전인지 확인하세요. 쓰기 권한 오류이면 Configurator를 관리자 권한으로 실행하세요. |
+| 수평선이 표시되지 않아요 | 수평선 옵션을 켰는지, 해당 줄에 공백을 제외하고 `---`만 있는지 확인하세요. |
 
-## GitHub 업로드와 배포
+## 개발 · 라이선스
 
-이 폴더를 저장소 루트로 사용하세요. [업로드·Releases 안내](docs/PUBLISHING.md)에 Git 명령과 웹 업로드 방법을 정리했습니다.
+[소스 빌드 및 테스트](docs/DEVELOPMENT.md) · [배포 방법](docs/PUBLISHING.md) · [이미지 생성](docs/SCREENSHOTS.md)
 
-```powershell
-.\scripts\export-source.ps1       # 소스·문서·이미지 ZIP
-.\scripts\package-release.ps1     # 실행 파일·간단 매뉴얼·라이선스 ZIP
-```
-
-`out/`과 `dist/`는 `.gitignore`로 제외됩니다. 실행 파일은 저장소 파일 대신 GitHub **Releases**에 첨부할 수 있습니다.
-
-## 라이선스
-
-자체 작성 소스는 [MIT License](LICENSE)로 배포합니다. Oracle SQL Developer, Java 및 외부 런타임은 포함하지 않으며, 자세한 내용은 [외부 소프트웨어 안내](THIRD_PARTY_NOTICES.md)를 참고하세요.
+[MIT License](LICENSE). 외부 소프트웨어는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 참고하세요.

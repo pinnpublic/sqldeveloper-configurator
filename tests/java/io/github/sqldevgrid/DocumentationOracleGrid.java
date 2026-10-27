@@ -30,7 +30,10 @@ public final class DocumentationOracleGrid {
             int rows=table.getRowHeight()*3;table.setSize(width,rows);table.doLayout();table.changeSelection(1,1,false,false);
             int header=Math.max(25,table.getTableHeader().getPreferredSize().height);table.getTableHeader().setSize(width,header);
             JTable numbers=table.getRowHeader();numbers.setRowHeight(table.getRowHeight());numbers.setSize(48,rows);
-            BufferedImage image=new BufferedImage(width+48,rows+header,BufferedImage.TYPE_INT_RGB);Graphics2D g=image.createGraphics();g.setColor(Color.WHITE);g.fillRect(0,0,image.getWidth(),image.getHeight());
+            BufferedImage image=new BufferedImage((width+48)*2,(rows+header)*2,BufferedImage.TYPE_INT_RGB);Graphics2D g=image.createGraphics();g.scale(2,2);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(Color.WHITE);g.fillRect(0,0,width+48,rows+header);
             Graphics2D h=(Graphics2D)g.create(48,0,width,header);table.getTableHeader().paint(h);h.dispose();
             Graphics2D b=(Graphics2D)g.create(48,header,width,rows);table.paint(b);b.dispose();
             Graphics2D n=(Graphics2D)g.create(0,header,48,rows);numbers.paint(n);n.dispose();g.dispose();ImageIO.write(image,"png",new java.io.File(output));

@@ -1,17 +1,17 @@
 # 문서 이미지 안내
 
-README의 이미지는 동작하는 제품 코드를 이용한 **UI 렌더링 예시**입니다. 실제 DB 조회 결과나 사용자 데스크톱 캡처로 가장하지 않습니다.
+README의 이미지는 제품 UI와 Oracle 컴포넌트에 예제 입력을 넣어 렌더링합니다. PNG 원본은 UI 크기의 **2배 해상도**로 생성하고, README에서는 표시 너비를 지정합니다. 이미지 링크를 누르면 원본을 볼 수 있습니다.
 
 | 파일 | 생성 대상 | 입력과 설정 |
 | --- | --- | --- |
 | `images/icon.png` | `MakeIcon.cs`의 자체 아이콘 | 벡터 도형과 Aa 텍스트 |
-| `images/configurator.png` | 실제 WPF `App` / `MainWindow.xaml` | 자동 검색 후 24pt, 여백 8px. 숨겨진 테스트 모드에서 화면 내용을 렌더링 |
+| `images/configurator.png` | 배포 EXE의 `MainWindow.xaml` | `DocumentationWindow.cs`에서 설치본을 확인하고 24pt, 여백 8px로 렌더링. 1960×1540px |
 | `images/preferences.png` | 실제 `EditorPreferencesPanel` / Oracle `DefaultTraversablePanel` | 테스트 설정 폴더, 두 기능 켜기, 2px 실선 |
 | `images/editor-wrap.png` | 실제 Oracle `BasicEditorPane` / `BasicView`와 표시 어댑터 | 문서용 SQL, 28pt, 줄바꿈·수평선 켜기 |
 | `images/rule-styles.png` | 실제 Oracle 편집기 네 개 | `---` 단독 줄, 네 가지 선 모양 |
 | `images/results-50pt.png` | 실행 중인 Developer 안의 실제 Oracle `ResultSetTable`과 기본 셀 렌더러 | 메모리에 생성한 `row_01`~`row_03`, 50pt, 위·아래 8px |
 
-사용자 SQL 파일, DB 접속 정보, 계정, 비밀번호 또는 실제 테이블 데이터는 이미지에 사용하지 않았습니다. 예제 데이터는 [DocumentationOracleGrid.java](../tests/java/io/github/sqldevgrid/DocumentationOracleGrid.java)에 공개되어 있습니다. 이 모델의 DB 준비 메서드는 호출되면 예외를 던지도록 되어 있습니다.
+결과표 데이터는 [DocumentationOracleGrid.java](../tests/java/io/github/sqldevgrid/DocumentationOracleGrid.java)에 정의된 예제입니다. 사용자 문서·설정이나 DB를 변경하지 않습니다.
 
 ## 다시 생성하기
 
