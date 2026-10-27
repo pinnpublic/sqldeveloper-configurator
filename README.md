@@ -2,14 +2,13 @@
 
 # SQL Developer Configurator
 
-Oracle SQL Developer에서 **큰 글꼴을 편하게 사용하고, 긴 SQL을 읽기 쉽게 표시**하는 설정 도구입니다.
+Oracle SQL Developer 환경 설정 도구
 
 - SQL 편집기·결과셋 글꼴을 **최대 50pt**로 설정
 - 결과셋 글자가 위아래로 잘리지 않도록 **행 높이와 셀 여백 조절**
 - 편집기 너비에 맞춘 **자동 줄바꿈**
 - `---` 단독 줄을 **수평 구분선**으로 표시하고 두께·색상·모양 설정
 
-**[실행 파일 다운로드](https://github.com/pinnpublic/sqldeveloper-configurator/releases/latest/download/SQLDeveloperConfigurator.exe)** · [전체 다운로드](https://github.com/pinnpublic/sqldeveloper-configurator/releases/latest)
 
 지원 환경: **Windows 10/11 · SQL Developer 26.2.0.186.2220 · .NET Framework 4.8 · Java 17 이상**. Java는 SQL Developer에 포함된 것을 사용할 수 있습니다. Java 기반 데스크톱판용입니다.
 
