@@ -1,0 +1,60 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SQL Developer Configurator" Width="980" Height="810" MinWidth="840" MinHeight="750" WindowStartupLocation="CenterScreen"
+        Background="#F3F5F8" FontFamily="Malgun Gothic" FontSize="14">
+  <Window.Resources>
+    <Style TargetType="Button"><Setter Property="Padding" Value="18,10"/><Setter Property="Margin" Value="5,0,0,0"/><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#CCD4DF"/><Setter Property="Cursor" Value="Hand"/></Style>
+    <Style TargetType="ComboBox"><Setter Property="Height" Value="36"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+    <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#263446"/></Style>
+  </Window.Resources>
+  <Grid Margin="26">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel Margin="0,0,0,20">
+      <TextBlock Text="SQL Developer Configurator" FontSize="27" FontWeight="Bold"/>
+      <TextBlock Text="자동 줄바꿈과 수평선 설정: SQL Developer → 도구 → 환경설정 → 코드 편집기" Margin="0,7,0,0" Foreground="#617187"/>
+    </StackPanel>
+    <Border Grid.Row="1" Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+      <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="SQL Developer 설치 위치" FontWeight="Bold" Margin="0,0,0,10"/>
+        <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+          <ComboBox x:Name="Installations" ToolTip="검색된 설치본에서 선택하세요. 선택 경로는 기억됩니다."/>
+          <Button x:Name="Search" Grid.Column="1" Content="다시 검색"/>
+          <Button x:Name="Browse" Grid.Column="2" Content="직접 선택"/>
+        </Grid>
+        <TextBlock x:Name="InstallInfo" Grid.Row="2" Text="설치 경로를 자동으로 찾고 있습니다…" Margin="0,10,0,0" Foreground="#617187" TextWrapping="Wrap"/>
+      </Grid>
+    </Border>
+    <Border Grid.Row="2" Background="White" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+      <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <TextBlock Text="SQL 편집기 크기" FontWeight="Bold"/><TextBlock Grid.Column="1" Text="결과셋 크기" FontWeight="Bold" Margin="16,0,0,0"/><TextBlock Grid.Column="2" Text="상단 / 하단 여백" FontWeight="Bold" Margin="16,0,0,0"/>
+        <ComboBox x:Name="EditorSize" Grid.Row="1" Margin="0,9,0,0"/>
+        <ComboBox x:Name="GridSize" Grid.Row="1" Grid.Column="1" Margin="16,9,0,0"/>
+        <ComboBox x:Name="Padding" Grid.Row="1" Grid.Column="2" Margin="16,9,0,0"/>
+        <TextBlock Grid.Row="2" Text="결과셋 글꼴" FontWeight="Bold" Margin="0,17,0,8"/>
+        <ComboBox x:Name="GridFont" Grid.Row="3" Grid.ColumnSpan="2"/>
+        <CheckBox x:Name="Header" Grid.Row="3" Grid.Column="2" Content="열 제목에도 적용" VerticalAlignment="Center" Margin="16,0,0,0"/>
+      </Grid>
+    </Border>
+    <Border Grid.Row="3" Background="#E8F2F1" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+      <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <TextBlock Text="결과셋 미리보기" Foreground="#30635D" FontSize="12"/>
+        <Border x:Name="PreviewCell" Grid.Row="1" Background="White" BorderBrush="#A9C9C4" BorderThickness="1" Margin="0,9,0,0" Padding="8">
+          <TextBlock x:Name="Preview" Text="한글 가나다  Agjpqy  0123456789" FontSize="24" TextTrimming="CharacterEllipsis"/>
+        </Border>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="4" Margin="0,0,0,12">
+      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+      <TextBlock x:Name="Health" Text="적용 후 SQL Developer를 실행하면 실제 로드 상태를 표시합니다." TextWrapping="Wrap" Margin="0,0,0,8" FontSize="13"/>
+      <TextBox x:Name="Log" Grid.Row="1" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="#EAF0F5" BorderThickness="0" Padding="10" FontSize="12" MinHeight="55"/>
+    </Grid>
+    <Grid Grid.Row="5"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <TextBlock x:Name="Status" Text="자동 검색 중…" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,10,0"/>
+      <Button x:Name="Restore" Grid.Column="1" Content="원본 복구"/>
+      <Button x:Name="Launch" Grid.Column="2" Content="SQL Developer 실행"/>
+      <Button x:Name="Apply" Grid.Column="3" Content="적용" Background="#176D62" Foreground="White" BorderBrush="#176D62" FontWeight="Bold" Padding="30,11"/>
+    </Grid>
+  </Grid>
+</Window>
