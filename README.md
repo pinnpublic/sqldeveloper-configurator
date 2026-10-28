@@ -10,8 +10,6 @@ Oracle SQL Developer 환경 설정 도구
 - `---` 단독 줄을 **수평 구분선**으로 표시하고 두께·색상·모양 설정
 
 
-지원 환경: **Windows 10/11 · SQL Developer 26.2.0.186.2220 · .NET Framework 4.8 · Java 17 이상**. Java는 SQL Developer에 포함된 것을 사용할 수 있습니다. Java 기반 데스크톱판용입니다.
-
 ## 1. 처음 적용하기
 
 1. 위 링크에서 **SQLDeveloperConfigurator.exe**를 내려받습니다.
