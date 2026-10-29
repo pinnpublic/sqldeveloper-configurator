@@ -13,8 +13,6 @@ Oracle SQL Developer 환경 설정 도구
 - **노트 배경**: 12종 무늬·종이 질감·모든 글줄의 10종 라인·줄 간격 설정
 
 
-**노트 배경 설정:** SQL Developer의 **도구 → 환경설정 → 코드 편집기 → 노트 배경**에서 선과 배경을 각각 조절합니다. Eclipse Paper의 노트 표시 기능을 SQL Developer 편집기에 맞게 이식했습니다. 자세한 설정은 [사용 방법](docs/QUICKSTART.md#노트-배경)을 참고하세요.
-
 ## 1. 처음 적용하기
 
 1. 위 링크에서 **SQLDeveloperConfigurator.exe**를 내려받습니다.
