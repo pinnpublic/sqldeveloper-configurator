@@ -97,14 +97,6 @@ select 2 from dual;
 - **확인 / 적용**하면 열린 편집기에 반영되고, **취소**하면 저장하지 않습니다. `---` 구분선과 각각 조절할 수 있습니다.
 - 노트 표시를 끄면 기본 편집기 표시로 돌아갑니다. SQL 원문과 복사 내용은 유지됩니다.
 
-<a href="docs/images/notebook-preferences.png"><img src="docs/images/notebook-preferences.png" width="650" alt="SQL Developer 내부 노트 배경 환경설정의 선 탭"></a>
-
-아래는 별도 메모리 SQL을 실제 Oracle 편집기로 렌더링한 예시입니다.
-
-<a href="docs/images/notebook-editor.png"><img src="docs/images/notebook-editor.png" width="720" alt="노트 배경과 글줄 선, 행 번호를 적용한 메모리 SQL 렌더링 예시"></a>
-
-3.5.1은 추가 줄 간격에서 방향키가 멈추던 문제와 반복 좌표 계산으로 인한 UI 지연을 수정했습니다. [검증 범위와 성능 측정](docs/PERFORMANCE-v3.5.1.md)을 확인할 수 있습니다.
-
 ## 6. 다른 PC · 업데이트 · 원본 복구
 
 | 작업 | 순서 |
