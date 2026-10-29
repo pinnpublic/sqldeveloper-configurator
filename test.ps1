@@ -32,6 +32,7 @@ New-CleanAgent $extension $agent
 $compileCp = (Join-Path $output 'extension\editor-bridge.jar')+';'+$cp
 $javaSources = @('EditorFeatureTests.java','NativePreferencesTest.java') | ForEach-Object { Join-Path $PSScriptRoot ('tests\java\'+$_) }
 $javaSources += Join-Path $PSScriptRoot 'tests\java\io\github\sqldevgrid\GridLayoutTest.java'
+$javaSources += Join-Path $PSScriptRoot 'tests\java\io\github\sqldevgrid\NativeFontPreferencesTest.java'
 & $tools.Javac '-proc:none' '-encoding' 'UTF-8' '--release' '17' '-cp' $compileCp '-d' $classes @javaSources
 Assert-Exit 'Java test compilation'
 $oldAppData = $env:APPDATA
@@ -39,6 +40,8 @@ try {
     $env:APPDATA = Join-Path $output 'test-appdata'
     & $java '-Djava.awt.headless=true' '-cp' $cp io.github.sqldevgrid.GridLayoutTest (Join-Path $classes 'results-50pt.png')
     Assert-Exit 'Grid layout tests'
+    & $java '-Djava.awt.headless=true' ('-javaagent:'+$agent) '-cp' ($oracle+';'+$classes) io.github.sqldevgrid.NativeFontPreferencesTest
+    Assert-Exit 'Native font preference and result synchronization tests'
     & $java '-Djava.awt.headless=true' ('-javaagent:'+$agent) '-cp' ($oracle+';'+$classes) EditorFeatureTests $classes
     Assert-Exit 'Native editor tests'
     & $java '-Djava.awt.headless=true' '-cp' $cp NativePreferencesTest $classes

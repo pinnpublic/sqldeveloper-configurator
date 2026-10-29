@@ -31,7 +31,7 @@ public final class BootstrapAgent {
         }
         try {
             Path folder = GridSettings.path().getParent(); Files.createDirectories(folder);
-            Files.writeString(folder.resolve("agent-started.json"), "{\"version\":\"0.10.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + System.currentTimeMillis() + "}", StandardCharsets.UTF_8);
+            Files.writeString(folder.resolve("agent-started.json"), "{\"version\":\"0.11.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + System.currentTimeMillis() + "}", StandardCharsets.UTF_8);
         } catch (Exception ignored) { }
         start();
         String testClasses = System.getProperty("sqldev.font50.selftest.classes");

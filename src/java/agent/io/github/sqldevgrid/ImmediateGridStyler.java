@@ -28,6 +28,11 @@ public final class ImmediateGridStyler {
         for (Window window : Window.getWindows()) instance.visit(window);
         instance.timer.start();
     }
+    public static void reloadNow() {
+        if (instance == null) return;
+        if (SwingUtilities.isEventDispatchThread()) instance.settingsAndHealth();
+        else SwingUtilities.invokeLater(() -> instance.settingsAndHealth());
+    }
     private static boolean target(JTable table) {
         if (table.getParent() instanceof JViewport viewport && viewport.getParent() instanceof JScrollPane scroll
                 && scroll.getRowHeader() == viewport) return false;

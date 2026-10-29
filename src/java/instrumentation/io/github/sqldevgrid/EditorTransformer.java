@@ -8,6 +8,31 @@ import jdk.internal.org.objectweb.asm.*;
 public final class EditorTransformer implements ClassFileTransformer {
     static final String BRIDGE = "io/github/sqldevgrid/bridge/EditorBridge";
     public byte[] transform(ClassLoader loader, String name, Class<?> type, ProtectionDomain domain, byte[] bytes) {
+        if ("oracle/ide/ceditor/options/FontSizeOptionsPanel".equals(name)) {
+            ClassReader reader = new ClassReader(bytes);
+            ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+            reader.accept(new ClassVisitor(Opcodes.ASM8, writer) {
+                public MethodVisitor visitMethod(int access, String method, String descriptor, String signature, String[] exceptions) {
+                    MethodVisitor next = super.visitMethod(access, method, descriptor, signature, exceptions);
+                    String callback = method.equals("onEntry") && descriptor.equals("(Loracle/ide/panels/TraversableContext;)V") ? "entered"
+                        : method.equals("apply") && descriptor.equals("(Loracle/ide/panels/ApplyEvent;)V") ? "applied"
+                        : method.equals("cancel") && descriptor.equals("(Loracle/ide/panels/ApplyEvent;)V") ? "canceled" : null;
+                    if (callback == null) return next;
+                    return new MethodVisitor(Opcodes.ASM8, next) {
+                        public void visitInsn(int opcode) {
+                            if (opcode == Opcodes.RETURN) {
+                                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                                if (!callback.equals("canceled")) mv.visitVarInsn(Opcodes.ALOAD, 1);
+                                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "io/github/sqldevgrid/NativeFontPreferencesBridge", callback,
+                                    callback.equals("canceled") ? "(Ljava/lang/Object;)V" : "(Ljava/lang/Object;Ljava/lang/Object;)V", false);
+                            }
+                            super.visitInsn(opcode);
+                        }
+                    };
+                }
+            }, 0);
+            return writer.toByteArray();
+        }
         if ("oracle/ide/config/ExtensionNavigable".equals(name)) {
             ClassReader reader=new ClassReader(bytes);ClassWriter writer=new ClassWriter(reader,ClassWriter.COMPUTE_MAXS);
             reader.accept(new ClassVisitor(Opcodes.ASM8,writer){

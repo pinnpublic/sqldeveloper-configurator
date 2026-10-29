@@ -42,5 +42,24 @@ public final class GridSettings {
         return new Font(family.isBlank() ? original.getFamily() : family, original.getStyle(),
             size == 0 ? Math.max(6, Math.min(50, original.getSize())) : size);
     }
+    static void saveSize(int size) throws java.io.IOException {
+        Path target = path();
+        Files.createDirectories(target.getParent());
+        String json = Files.isRegularFile(target) ? Files.readString(target, StandardCharsets.UTF_8) : "{}";
+        String field = "\"fontSize\": " + Math.max(6, Math.min(50, size));
+        Matcher matcher = Pattern.compile("\"fontSize\"\\s*:\\s*-?[0-9]+").matcher(json);
+        if (matcher.find()) json = matcher.replaceFirst(Matcher.quoteReplacement(field));
+        else {
+            int end = json.lastIndexOf('}');
+            if (end < 0) throw new java.io.IOException("Invalid result grid settings");
+            json = json.substring(0, end) + (json.substring(0, end).trim().endsWith("{") ? "" : ",") + field + json.substring(end);
+        }
+        Path temp = Files.createTempFile(target.getParent(), "grid-font-", ".tmp");
+        try {
+            Files.writeString(temp, json, StandardCharsets.UTF_8);
+            try { Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
+            catch (AtomicMoveNotSupportedException error) { Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING); }
+        } finally { Files.deleteIfExists(temp); }
+    }
     String key() { return enabled + "|" + family + "|" + size + "|" + padding + "|" + header; }
 }
