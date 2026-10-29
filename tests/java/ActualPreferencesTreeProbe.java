@@ -32,6 +32,17 @@ public final class ActualPreferencesTreeProbe {
                 if(!panel.getClass().getName().equals("io.github.sqldevgrid.EditorPreferencesPanel"))throw new IllegalStateException("Incorrect preference panel");
                 Class<?> tc=loader.loadClass("oracle.ide.panels.TraversableContext");Object values=tc.getConstructor(namespace,int.class).newInstance(namespace.getConstructor().newInstance(),0);
                 panel.getClass().getMethod("onEntry",tc).invoke(panel,values);
+                JSpinner thickness=(JSpinner)find((Container)panel,"RuleThickness");
+                JComboBox<?> styles=(JComboBox<?>)find((Container)panel,"RuleStyle");
+                SpinnerNumberModel range=(SpinnerNumberModel)thickness.getModel();
+                if(!range.getMinimum().equals(1.0)||!range.getMaximum().equals(50.0)||styles.getItemCount()!=9)
+                    throw new IllegalStateException("Installed rule options are not 1~50px / 9 styles");
+                report.append("PASS INSTALLED RULE OPTIONS: 1~50px, 9 styles, loaded thickness=").append(thickness.getValue()).append(", style=").append(styles.getSelectedItem()).append('\n');
+                JComponent component=(JComponent)panel;
+                component.setSize(650,470);layout(component);
+                java.awt.image.BufferedImage image=new java.awt.image.BufferedImage(650,470,java.awt.image.BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics=image.createGraphics();component.printAll(graphics);graphics.dispose();
+                javax.imageio.ImageIO.write(image,"png",Path.of(output).resolveSibling("installed-preferences.png").toFile());
                 report.append("PASS ACTUAL ORACLE LEFT TREE: IdeSettings root, actual child enumeration, native lazy tree builder, one preference entry, real preference panel and option loading.\n");
                 report.append("PARENT=").append(System.getProperty("sqldev.font50.nativePreferencesTreeParent")).append(" TREE_HOOK=").append(System.getProperty("sqldev.font50.nativePreferencesTreeHook")).append('\n');
                 for(Window w:Window.getWindows())if(w.isShowing())inspect(w,report);
@@ -39,6 +50,8 @@ public final class ActualPreferencesTreeProbe {
         }catch(Throwable error){java.io.StringWriter text=new java.io.StringWriter();error.printStackTrace(new java.io.PrintWriter(text));report.append("FAILED\n").append(text);}
         try{Files.writeString(Path.of(output),report,StandardCharsets.UTF_8);}catch(Exception ignored){}
     },"font50-actual-left-tree-verification").start();}
+    static Component find(Container parent,String name){for(Component child:parent.getComponents()){if(name.equals(child.getName()))return child;if(child instanceof Container next){Component found=find(next,name);if(found!=null)return found;}}return null;}
+    static void layout(Container parent){parent.doLayout();for(Component child:parent.getComponents())if(child instanceof Container next)layout(next);}
     static void inspect(Component c,StringBuilder report){if(c instanceof JTree t)inspectNode(t.getModel(),t.getModel().getRoot(),report);if(c instanceof Container p)for(Component child:p.getComponents())inspect(child,report);}
     static void inspectNode(TreeModel model,Object n,StringBuilder report){if(n.toString().equals("코드 편집기")){report.append("EXISTING DIALOG CODE EDITOR CHILDREN\n");for(int i=0;i<model.getChildCount(n);i++)report.append("VISIBLE MODEL ").append(model.getChild(n,i)).append('\n');}for(int i=0;i<model.getChildCount(n);i++)inspectNode(model,model.getChild(n,i),report);}
 }

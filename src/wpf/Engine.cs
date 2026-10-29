@@ -31,7 +31,7 @@ namespace SqlDeveloperFont50 {
         public const string SupportedVersion = "26.2.0.186.2220";
         public const string OriginalHash = "814A788583F93BF7DE5BB3837462F6A3AF05C7B8FA1AD690003C7179D12151C8";
         public const string BundleId = "io.github.sqldevgrid.result-grid-font";
-        public const string BundleLine = "io.github.sqldevgrid.result-grid-font,0.11.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
+        public const string BundleLine = "io.github.sqldevgrid.result-grid-font,0.12.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
         public readonly string AppData;
         public readonly string ToolFolder;
         public Action<string> Log = delegate { };
@@ -181,7 +181,7 @@ namespace SqlDeveloperFont50 {
                 options.SoftWrap = Text(display, "softWrap", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
                 options.HorizontalRules = Text(display, "horizontalRules", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
                 double thickness;
-                if (double.TryParse(display.ContainsKey("ruleThickness") ? Convert.ToString(display["ruleThickness"], CultureInfo.InvariantCulture) : "1", NumberStyles.Float, CultureInfo.InvariantCulture, out thickness)) options.RuleThickness = Math.Max(.5, Math.Min(8, thickness));
+                if (double.TryParse(display.ContainsKey("ruleThickness") ? Convert.ToString(display["ruleThickness"], CultureInfo.InvariantCulture) : "1", NumberStyles.Float, CultureInfo.InvariantCulture, out thickness)) options.RuleThickness = double.IsNaN(thickness) || double.IsInfinity(thickness) ? 1 : Math.Max(1, Math.Min(50, thickness));
                 options.RuleColor = Text(display, "ruleColor", "#6F8296"); options.RuleStyle = Text(display, "ruleStyle", "solid");
             } catch { }
             return options;
@@ -277,9 +277,9 @@ namespace SqlDeveloperFont50 {
         void SaveOptions(Installation install, FontOptions options) {
             if (options.EditorSize < 7 || options.EditorSize > 50 || options.GridSize < 6 || options.GridSize > 50 || options.Padding < -20 || options.Padding > 30)
                 throw new InvalidOperationException("글꼴 크기와 여백 범위를 확인하세요.");
-            if (!Regex.IsMatch(options.RuleColor ?? "", "^#[0-9a-fA-F]{6}$") || options.RuleThickness < .5 || options.RuleThickness > 8 ||
-                !new[] {"solid", "dashed", "dotted", "dashdot"}.Contains(options.RuleStyle))
-                throw new InvalidOperationException("수평선 색상(#RRGGBB), 두께(0.5~8px), 모양을 확인하세요.");
+            if (!Regex.IsMatch(options.RuleColor ?? "", "^#[0-9a-fA-F]{6}$") || double.IsNaN(options.RuleThickness) || double.IsInfinity(options.RuleThickness) || options.RuleThickness < 1 || options.RuleThickness > 50 ||
+                !new[] {"solid", "dashed", "dotted", "dashdot", "longdash", "shortdash", "dashdotdot", "longdashdot", "double"}.Contains(options.RuleStyle))
+                throw new InvalidOperationException("수평선 색상(#RRGGBB), 두께(1~50px), 모양을 확인하세요.");
             string preferences = PreferencesPath(install);
             if (File.Exists(preferences)) {
                 string text = File.ReadAllText(preferences, Utf8);
@@ -322,7 +322,7 @@ namespace SqlDeveloperFont50 {
             } else if (Hash(editor) != OriginalHash) throw new InvalidOperationException("검증한 원본과 다른 편집기 JAR입니다. 이 버전에는 적용할 수 없습니다.");
             string text = File.ReadAllText(bundles, Utf8);
             var registrations = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Where(s => s.StartsWith(BundleId + ",", StringComparison.Ordinal)).ToList();
-            if (registrations.Count > 1 || registrations.Any(s => !Regex.IsMatch(s, "^" + Regex.Escape(BundleId) + @",0\.(?:[1-9]|10|11)\.0,\.\./sqldeveloper/extensions/result-grid-font-extension\.jar,4,false$")))
+            if (registrations.Count > 1 || registrations.Any(s => !Regex.IsMatch(s, "^" + Regex.Escape(BundleId) + @",0\.(?:[1-9]|10|11|12)\.0,\.\./sqldeveloper/extensions/result-grid-font-extension\.jar,4,false$")))
                 throw new InvalidOperationException("기존 결과셋 확장 등록이 예상과 다릅니다.");
             string lineEnding = text.Contains("\r\n") ? "\r\n" : "\n";
             string changed = registrations.Count == 1 ? text.Replace(registrations[0], BundleLine) : text.TrimEnd('\r', '\n') + lineEnding + BundleLine + lineEnding;
@@ -366,7 +366,7 @@ namespace SqlDeveloperFont50 {
                     string agentPath = agent.Replace('\\', '/');
                     AtomicText(configPath, config.TrimEnd('\r', '\n') + "\r\n\r\n# FONT50 AGENT BEGIN\r\nAddVMOption -javaagent:" + agentPath + "\r\n# FONT50 AGENT END\r\n");
                     SaveOptions(install, options);
-                    state["packageVersion"] = "3.4.1"; state["root"] = install.Root; state["installedAt"] = DateTime.Now.ToString("o");
+                    state["packageVersion"] = "3.4.2"; state["root"] = install.Root; state["installedAt"] = DateTime.Now.ToString("o");
                     state["editorPatchedHash"] = Hash(editor); state["extensionPatchedHash"] = Hash(extension); state["bundlePatchedLine"] = BundleLine;
                     state["agentPatchedHash"] = Hash(agent);
                     WriteJson(statePath, state);

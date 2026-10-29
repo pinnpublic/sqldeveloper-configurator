@@ -42,9 +42,9 @@ public static class EngineTests {
                 Directory.CreateDirectory(engine.CachePath(install)); File.WriteAllText(Path.Combine(engine.CachePath(install), "all-resources.dat"), "stale-classes", utf8);
                 string originalExtensionHash = legacy ? Engine.Hash(extension) : "";
                 engine.Install(install, new FontOptions { EditorSize = 50, GridSize = 50, Padding = 8, GridFamily = "Monospaced",
-                    SoftWrap = true, HorizontalRules = true, RuleThickness = 2.5, RuleColor = "#12abef", RuleStyle = "dashdot" });
+                    SoftWrap = true, HorizontalRules = true, RuleThickness = 50, RuleColor = "#12abef", RuleStyle = "double" });
                 var display = engine.ReadOptions(install);
-                Check(display.SoftWrap && display.HorizontalRules && display.RuleThickness == 2.5 && display.RuleColor == "#12ABEF" && display.RuleStyle == "dashdot", "editor display options saved and reloaded");
+                Check(display.SoftWrap && display.HorizontalRules && display.RuleThickness == 50 && display.RuleColor == "#12ABEF" && display.RuleStyle == "double", "50px and new double rule saved and reloaded by installer");
                 Check(engine.ReadOptions(install).EditorSize == 50 && engine.ReadOptions(install).GridSize == 50, "editor and result size saved as 50pt");
                 using (var jar = System.IO.Compression.ZipFile.OpenRead(extension))
                     Check(jar.GetEntry("io/github/sqldevgrid/EditorPreferencesPanel.class") != null, "native preference panel packaged for the Oracle preference loader");

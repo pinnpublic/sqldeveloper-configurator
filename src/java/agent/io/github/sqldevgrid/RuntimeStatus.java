@@ -25,7 +25,7 @@ final class RuntimeStatus {
         } catch (Exception ex) { menuMax = 0; }
         try {
             Path folder = GridSettings.path().getParent(); Files.createDirectories(folder);
-            String json = "{\"version\":\"0.11.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + now
+            String json = "{\"version\":\"0.12.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + now
                 + ",\"editorMenuMax\":" + menuMax + ",\"grids\":" + grids + ",\"fontSize\":" + font
                 + ",\"rowHeight\":" + height + ",\"error\":" + Configure.quote(error) + "}";
             Path temp = folder.resolve("runtime-state.tmp");

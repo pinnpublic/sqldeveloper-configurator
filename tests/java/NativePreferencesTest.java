@@ -41,7 +41,7 @@ public final class NativePreferencesTest {
                 try{reopened.onExit(new TraversableContext(new Namespace(),0));}catch(TraversalException error){rejected=true;}
                 check(rejected&&Files.readString(path).equals(saved),"Invalid color changed saved settings");
                 panel.setSize(650,470);layout(panel);
-                check(find(panel,"SoftWrap").getWidth()>200 && find(panel,"RuleColor").getHeight()>10,"Native preference controls were not laid out");
+                check(find(panel,"SoftWrap").getWidth()>200 && find(panel,"RuleColor").getWidth()>100 && find(panel,"RuleColor").getHeight()>10,"Native preference controls were not laid out");
                 java.awt.image.BufferedImage image=new java.awt.image.BufferedImage(650,470,java.awt.image.BufferedImage.TYPE_INT_RGB);
                 Graphics2D g=image.createGraphics();panel.printAll(g);g.dispose();javax.imageio.ImageIO.write(image,"png",Path.of(args[0],"native-preferences.png").toFile());
                 // Oracle loads a native page in its bundle loader while the startup agent owns the shared settings class.
@@ -58,6 +58,35 @@ public final class NativePreferencesTest {
                     isolated.onEntry(new TraversableContext(new Namespace(),0));
                     check(((Number)((JSpinner)find(isolated,"RuleThickness")).getValue()).doubleValue()==2.5,"Separate bundle could not access shared settings");
                 }
+                String[] styles={"solid","dashed","dotted","dashdot","longdash","shortdash","dashdotdot","longdashdot","double"};
+                JSpinner width=(JSpinner)find(panel,"RuleThickness");
+                JComboBox<?> choices=(JComboBox<?>)find(panel,"RuleStyle");
+                check(choices.getItemCount()==styles.length,"Missing rule styles");
+                SpinnerNumberModel model=(SpinnerNumberModel)width.getModel();
+                check(model.getMinimum().equals(1.0)&&model.getMaximum().equals(50.0),"Thickness range is not 1~50");
+                for(int i=0;i<styles.length;i++) for(double value:new double[]{1,25,50}) {
+                    TraversableContext options=new TraversableContext(new Namespace(),0);
+                    width.setValue(value);choices.setSelectedIndex(i);
+                    panel.onExit(options);panel.apply(new ApplyEvent(options));
+                    String json=Files.readString(path);
+                    check(json.contains("\"ruleThickness\":"+value)&&json.contains("\"ruleStyle\":\""+styles[i]+"\""),"Rule option not saved: "+styles[i]+" / "+value);
+                    EditorPreferencesPanel loaded=new EditorPreferencesPanel();loaded.onEntry(new TraversableContext(new Namespace(),0));
+                    check(((Number)((JSpinner)find(loaded,"RuleThickness")).getValue()).doubleValue()==value&&((JComboBox<?>)find(loaded,"RuleStyle")).getSelectedIndex()==i,"Rule option lost on reopen");
+                }
+                String valid=Files.readString(path);
+                for(String invalid:new String[]{"0","0.5","51","NaN","Infinity"}) {
+                    ((JSpinner.DefaultEditor)width.getEditor()).getTextField().setText(invalid);
+                    boolean invalidWidth=false;
+                    try{panel.onExit(new TraversableContext(new Namespace(),0));}catch(TraversalException expected){invalidWidth=true;}
+                    check(invalidWidth&&Files.readString(path).equals(valid),"Invalid thickness accepted: "+invalid);
+                }
+                width.setValue(50.0);((JSpinner.DefaultEditor)width.getEditor()).getTextField().setValue(50.0);
+                choices.setSelectedIndex(0);panel.setSize(650,470);layout(panel);
+                Component preview=find(panel,"RulePreview");check(preview.getHeight()>=70,"50px preview has insufficient height");
+                java.awt.image.BufferedImage thick=new java.awt.image.BufferedImage(650,470,java.awt.image.BufferedImage.TYPE_INT_RGB);
+                Graphics2D thickGraphics=thick.createGraphics();panel.printAll(thickGraphics);thickGraphics.dispose();
+                javax.imageio.ImageIO.write(thick,"png",Path.of(args[0],"native-preferences-50px.png").toFile());
+                System.out.println("PASS 9 rule styles: 1/25/50px Apply/reopen, invalid range rejection, 50px preview");
                 oracle.ide.panels.Navigable existing=new oracle.ide.panels.Navigable("기존 항목",DefaultTraversablePanel.class);
                 java.util.Collection<?> originalPages=java.util.List.of(existing);
                 java.util.Collection<?> extended=io.github.sqldevgrid.NativePreferencesBridge.extend(originalPages,"/preferences/ceditor",oracle.ide.config.SettingsUIRegistry.class);

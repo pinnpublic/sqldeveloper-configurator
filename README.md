@@ -60,11 +60,11 @@ SQL Developer의 **도구 → 환경설정 → 코드 편집기 → 글꼴**에�
 
 | 설정 | 선택 범위 |
 | --- | --- |
-| 선 두께 | **0.5~8px** |
+| 선 두께 | **1~50px** |
 | 선 색상 | **색상 선택** 버튼 또는 `#RRGGBB` 입력 |
-| 선 모양 | **실선 · 파선 · 점선 · 일점쇄선** |
+| 선 모양 | **실선 · 파선 · 점선 · 일점쇄선 · 긴 파선 · 짧은 파선 · 이점쇄선 · 긴 일점쇄선 · 이중선** |
 
-<a href="docs/images/rule-styles.png"><img src="docs/images/rule-styles.png" width="875" alt="실선, 파선, 점선, 일점쇄선의 모양 비교"></a>
+<a href="docs/images/rule-styles.png"><img src="docs/images/rule-styles.png" width="875" alt="수평선 모양 9종 비교"></a>
 
 SQL 편집기에서 한 줄에 `---`만 입력하면 가로 영역을 잇는 선으로 보입니다. 하이픈 문자는 화면에서 숨겨지며, 저장·복사할 때는 원래 `---`가 유지됩니다.
 

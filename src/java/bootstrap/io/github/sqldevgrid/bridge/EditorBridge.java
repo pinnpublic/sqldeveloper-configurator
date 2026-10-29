@@ -57,12 +57,15 @@ public final class EditorBridge {
         graphics.drawChars(text, offset, length, x, y);
     }
     public static void configure(boolean wrap, boolean rules, float thickness, int rgb, String style) {
-        global = new Options(wrap, rules, Math.max(.5f, Math.min(8f, thickness)), rgb & 0xFFFFFF, style);
+        global = new Options(wrap, rules, ruleThickness(thickness), rgb & 0xFFFFFF, style);
         synchronized (CACHE) { CACHE.clear(); }
     }
     public static void configureEditor(JTextComponent editor, boolean wrap, boolean rules, float thickness, int rgb, String style) {
-        editor.putClientProperty(OVERRIDE, new Options(wrap, rules, thickness, rgb, style));
+        editor.putClientProperty(OVERRIDE, new Options(wrap, rules, ruleThickness(thickness), rgb, style));
         invalidate(editor);
+    }
+    private static float ruleThickness(float thickness) {
+        return Float.isFinite(thickness) ? Math.max(1f, Math.min(50f, thickness)) : 1f;
     }
     public static void invalidate(JTextComponent editor) {
         synchronized (CACHE) { CACHE.entrySet().removeIf(entry -> entry.getKey().getContainer() == editor); }
@@ -248,16 +251,27 @@ public final class EditorBridge {
                 case "dashed" -> new float[] {8 * scale, 5 * scale};
                 case "dotted" -> new float[] {scale, 4 * scale};
                 case "dashdot" -> new float[] {8 * scale, 4 * scale, scale, 4 * scale};
+                case "longdash" -> new float[] {14 * scale, 5 * scale};
+                case "shortdash" -> new float[] {3 * scale, 3 * scale};
+                case "dashdotdot" -> new float[] {8 * scale, 4 * scale, scale, 4 * scale, scale, 4 * scale};
+                case "longdashdot" -> new float[] {14 * scale, 4 * scale, scale, 4 * scale};
                 default -> null;
             };
-            copy.setStroke(new BasicStroke(options.thickness, "dotted".equals(options.style) ? BasicStroke.CAP_ROUND : BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10, dash, 0));
+            boolean doubled = "double".equals(options.style);
+            copy.setStroke(new BasicStroke(doubled ? options.thickness / 3 : options.thickness, "dotted".equals(options.style) ? BasicStroke.CAP_ROUND : BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 10, dash, 0));
             copy.setColor(new Color(options.rgb));
             for (int offset : offsets) {
                 if (collapsed(editor, callInt(view.getDocument(), "getLineFromOffset", offset))) continue;
                 Rectangle row = options.wrap ? model(view, offset, allocation, Position.Bias.Forward).getBounds()
                     : original(() -> view.modelToView(offset, allocation, Position.Bias.Forward).getBounds());
                 int y = row.y + row.height / 2;
-                if (copy.getClipBounds() == null || copy.getClipBounds().intersects(left, y - 8, Math.max(1, right - left), 16)) copy.draw(new Line2D.Float(left, y, right, y));
+                int radius = (int)Math.ceil(options.thickness / 2) + 1;
+                if (copy.getClipBounds() == null || copy.getClipBounds().intersects(left, y - radius, Math.max(1, right - left), radius * 2)) {
+                    if (doubled) {
+                        copy.draw(new Line2D.Float(left, y - options.thickness / 3, right, y - options.thickness / 3));
+                        copy.draw(new Line2D.Float(left, y + options.thickness / 3, right, y + options.thickness / 3));
+                    } else copy.draw(new Line2D.Float(left, y, right, y));
+                }
             }
         } finally { copy.dispose(); }
     }

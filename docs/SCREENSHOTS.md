@@ -8,7 +8,7 @@ README의 이미지는 제품 UI와 Oracle 컴포넌트에 예제 입력을 넣�
 | `images/configurator.png` | 배포 EXE의 `MainWindow.xaml` | `DocumentationWindow.cs`에서 설치본을 확인하고 24pt, 여백 8px로 렌더링. 1960×1540px |
 | `images/preferences.png` | 실제 `EditorPreferencesPanel` / Oracle `DefaultTraversablePanel` | 테스트 설정 폴더, 두 기능 켜기, 2px 실선 |
 | `images/editor-wrap.png` | 실제 Oracle `BasicEditorPane` / `BasicView`와 표시 어댑터 | 문서용 SQL, 28pt, 줄바꿈·수평선 켜기 |
-| `images/rule-styles.png` | 실제 Oracle 편집기 네 개 | `---` 단독 줄, 네 가지 선 모양 |
+| `images/rule-styles.png` | 실제 Oracle 편집기 아홉 개 | `---` 단독 줄, 아홉 가지 선 모양, 1750×1120px |
 | `images/results-50pt.png` | 실행 중인 Developer 안의 실제 Oracle `ResultSetTable`과 기본 셀 렌더러 | 메모리에 생성한 `row_01`~`row_03`, 50pt, 위·아래 8px |
 
 결과표 데이터는 [DocumentationOracleGrid.java](../tests/java/io/github/sqldevgrid/DocumentationOracleGrid.java)에 정의된 예제입니다. 사용자 문서·설정이나 DB를 변경하지 않습니다.

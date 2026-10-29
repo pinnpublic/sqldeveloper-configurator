@@ -33,15 +33,16 @@ public final class DocumentationViews {
                 editor.setText("select id, name, created_at, status, description, updated_at from sample_table where status = 'ACTIVE' order by created_at desc;\n\n---\n\nselect '안녕하세요. --- 입니다' as message\nfrom dual;\n");
                 EditorBridge.configureEditor(editor,true,true,2,0x6F8296,"solid");
                 editor.getCaret().setVisible(false);save(editor,875,420,directory.resolve("editor-wrap.png"));
-                JPanel rules=new JPanel(new GridLayout(4,1,0,6));rules.setBackground(Color.WHITE);
-                String[] names={"실선 / Solid","파선 / Dashed","점선 / Dotted","일점쇄선 / Dash-dot"};String[] codes={"solid","dashed","dotted","dashdot"};
+                JPanel rules=new JPanel(new GridLayout(9,1,0,6));rules.setBackground(Color.WHITE);
+                String[] names={"실선 / Solid","파선 / Dashed","점선 / Dotted","일점쇄선 / Dash-dot","긴 파선 / Long dash","짧은 파선 / Short dash","이점쇄선 / Dash-dot-dot","긴 일점쇄선 / Long dash-dot","이중선 / Double"};
+                String[] codes={"solid","dashed","dotted","dashdot","longdash","shortdash","dashdotdot","longdashdot","double"};
                 for(int i=0;i<codes.length;i++){
                     JPanel line=new JPanel(new BorderLayout(10,0));line.setBackground(Color.WHITE);line.setBorder(BorderFactory.createEmptyBorder(5,12,5,12));
-                    JLabel label=new JLabel(names[i]);label.setFont(new Font("Malgun Gothic",Font.PLAIN,14));label.setPreferredSize(new Dimension(145,40));line.add(label,BorderLayout.WEST);
+                    JLabel label=new JLabel(names[i]);label.setFont(new Font("Malgun Gothic",Font.PLAIN,14));label.setPreferredSize(new Dimension(240,40));line.add(label,BorderLayout.WEST);
                     BasicEditorPane marker=new BasicEditorPane();marker.setBaseFont("Monospaced",24);marker.setText("---");marker.getCaret().setVisible(false);
-                    EditorBridge.configureEditor(marker,false,true,2,0x167764,codes[i]);line.add(marker,BorderLayout.CENTER);rules.add(line);
+                    EditorBridge.configureEditor(marker,false,true,4,0x167764,codes[i]);line.add(marker,BorderLayout.CENTER);rules.add(line);
                 }
-                save(rules,875,250,directory.resolve("rule-styles.png"));editor.dispose();
+                save(rules,875,560,directory.resolve("rule-styles.png"));editor.dispose();
                 System.out.println("PASS documented views: native preference panel, Oracle editor, standalone rules; demo input only");
             }catch(Exception error){throw new RuntimeException(error);}});
             System.exit(0);

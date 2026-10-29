@@ -95,16 +95,38 @@ public final class EditorFeatureTests {
                     "Rule appeared in a line containing other text");
                 editor.setText("---\nselect 1 from dual;\n---\n"); size(editor, scroll, 620);
                 String ruleSource = editor.getText();
-                for (String style : new String[] {"solid", "dashed", "dotted", "dashdot"}) {
+                java.util.Set<Integer> patterns=new java.util.HashSet<>();
+                for (String style : new String[] {"solid", "dashed", "dotted", "dashdot", "longdash", "shortdash", "dashdotdot", "longdashdot", "double"}) {
                     EditorBridge.configureEditor(editor, false, true, 4, 0xEE2244, style);
                     BufferedImage image = paint(editor, 595, 220);
                     int colored = 0;
                     for (int y = 0; y < image.getHeight(); y++) for (int x = 150; x < image.getWidth() - 20; x++)
                         if ((image.getRGB(x, y) & 0xFFFFFF) == 0xEE2244) colored++;
                     check(colored > 100, "Configured " + style + " rule color/stroke was not painted");
+                    check(patterns.add(Arrays.hashCode(image.getRGB(0,0,image.getWidth(),image.getHeight(),null,0,image.getWidth()))),"Rule styles look identical: "+style);
                     ImageIO.write(image, "png", Path.of(args[0], "editor-rule-" + style + ".png").toFile());
                 }
                 check(editor.getText().equals(ruleSource), "Rules changed SQL source");
+                editor.setBaseFont("Monospaced",50);editor.setText("\n\n---\n\n\n");size(editor,scroll,620);
+                String thickSource=editor.getText();
+                editor.getCaret().setVisible(false);
+                for(boolean wrapMode:new boolean[]{false,true}) for(float thickness:new float[]{1,8,25,50}) {
+                    // Use the global settings path as the actual preferences service does.
+                    editor.putClientProperty("sqldev.font50.editorFeatures",null);
+                    EditorBridge.configure(wrapMode,true,thickness,0xEE2244,"solid");EditorBridge.invalidate(editor);
+                    BufferedImage image=paint(editor,595,400);
+                    int top=400,bottom=-1;
+                    for(int y=0;y<400;y++) if((image.getRGB(200,y)&0xFFFFFF)==0xEE2244){top=Math.min(top,y);bottom=y;}
+                    check(Math.abs((bottom-top+1)-thickness)<=1,"Actual stroke differs from "+thickness+"px (wrap="+wrapMode+"): "+(bottom-top+1));
+                    if(thickness==50) {
+                        BufferedImage clipped=new BufferedImage(595,400,BufferedImage.TYPE_INT_RGB);
+                        Graphics2D clipGraphics=clipped.createGraphics();clipGraphics.setClip(180,bottom-4,40,3);editor.paint(clipGraphics);clipGraphics.dispose();
+                        check(clipped.getRGB(200,bottom-3)==image.getRGB(200,bottom-3),"Partial repaint missed outer edge of 50px rule");
+                        ImageIO.write(image,"png",Path.of(args[0],"editor-rule-50px-"+wrapMode+".png").toFile());
+                    }
+                }
+                check(editor.getText().equals(thickSource),"Thick rules changed SQL source");
+                System.out.println("PASS 9 distinct styles; global 1/8/25/50px actual stroke and clipped repaint with/without wrap");
                 editor.setBaseFont("Monospaced",50); editor.setText("---"); editor.select(0,0); editor.getCaret().setVisible(false); size(editor,scroll,620);
                 for(boolean wrapMode : new boolean[] {false,true}) {
                     EditorBridge.configureEditor(editor,wrapMode,true,1,0xEE2244,"solid");
@@ -134,7 +156,7 @@ public final class EditorFeatureTests {
                 for(int y=0;y<100;y++)for(int x=220;x<590;x++)if((removed.getRGB(x,y)&0xFFFFFF)==0xEE2244)red++;
                 check(red==0 && editor.getText().equals("--"),"Deleting a hyphen did not remove the rule");
                 System.out.println("PASS marker glyphs hidden with/without wrap; toggling rules restores text; deleting a hyphen removes rule");
-                System.out.println("PASS horizontal rules: solid/dashed/dotted/dash-dot, color, thickness, quoted-marker exclusion, unchanged SQL");
+                System.out.println("PASS horizontal rules: 9 styles, color, thickness, quoted-marker exclusion, unchanged SQL");
                 editor.dispose();
             } catch (Exception error) { throw new RuntimeException(error); }
         });
