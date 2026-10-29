@@ -59,7 +59,7 @@ function New-CleanAgent([string]$Extension, [string]$OutputPath) {
         $writer = [IO.StreamWriter]::new($outputJar.CreateEntry('META-INF/MANIFEST.MF').Open(),[Text.UTF8Encoding]::new($false))
         $writer.Write("Manifest-Version: 1.0`r`nPremain-Class: io.github.sqldevgrid.BootstrapAgent`r`nCan-Redefine-Classes: true`r`n`r`n"); $writer.Dispose()
         foreach ($entry in $inputJar.Entries) {
-            if ($entry.FullName.StartsWith('io/github/sqldevgrid/EditorPreferencesPanel')) { continue }
+            if ($entry.FullName.StartsWith('io/github/sqldevgrid/EditorPreferencesPanel') -or $entry.FullName.StartsWith('io/github/sqldevgrid/NotebookPreferencesPanel')) { continue }
             if ($entry.FullName.EndsWith('.class') -or $entry.FullName -eq 'editor-bridge.jar') {
                 $read = $entry.Open(); $write = $outputJar.CreateEntry($entry.FullName).Open()
                 try { $read.CopyTo($write) } finally { $read.Dispose(); $write.Dispose() }

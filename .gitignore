@@ -16,6 +16,7 @@
 product-preferences.xml
 settings.json
 editor-settings.json
+notebook-settings.json
 runtime-state.json
 agent-started.json
 /docs/images/.oracle-render-result.txt

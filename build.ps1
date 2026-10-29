@@ -15,21 +15,23 @@ $dist = Join-Path $PSScriptRoot 'dist'
 foreach ($directory in @($output,$classes,$bridge,$patcher,$dist,(Join-Path $classes 'META-INF'))) { New-Item -ItemType Directory -Path $directory -Force | Out-Null }
 $utf8 = [Text.UTF8Encoding]::new($false)
 
-& $tools.Javac '-encoding' 'UTF-8' '--release' '17' '-d' $bridge (Join-Path $PSScriptRoot 'src\java\bootstrap\io\github\sqldevgrid\bridge\EditorBridge.java')
+$bootstrapSources = @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src\java\bootstrap') -Recurse -File -Filter '*.java' | Select-Object -ExpandProperty FullName)
+& $tools.Javac '-encoding' 'UTF-8' '--release' '17' '-d' $bridge @bootstrapSources
 Assert-Exit 'Bootstrap bridge compilation'
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'src\java\bootstrap\assets') -Destination $bridge -Recurse -Force
 & $tools.Jar '--create' '--file' (Join-Path $classes 'editor-bridge.jar') '-C' $bridge '.'
 Assert-Exit 'Bootstrap bridge packaging'
 & $tools.Javac '-encoding' 'UTF-8' '-source' '17' '-target' '17' '--add-exports=java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED' '-d' $classes (Join-Path $PSScriptRoot 'src\java\instrumentation\io\github\sqldevgrid\EditorTransformer.java')
 Assert-Exit 'Instrumentation compilation'
 $javaSources = @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src\java\agent') -Recurse -File -Filter '*.java' | Select-Object -ExpandProperty FullName)
 $oracleApi = @('ide\extensions\oracle.ide.jar','ide\lib\idert.jar','ide\lib\javatools.jar') | ForEach-Object { Join-Path $sdk $_ }
-& $tools.Javac '-encoding' 'UTF-8' '--release' '17' '-cp' ($oracleApi -join ';') '-d' $classes @javaSources
+& $tools.Javac '-encoding' 'UTF-8' '--release' '17' '-cp' (($oracleApi -join ';')+';'+(Join-Path $classes 'editor-bridge.jar')) '-d' $classes @javaSources
 Assert-Exit 'Java extension compilation'
-$manifest = "Manifest-Version: 1.0`r`nPremain-Class: io.github.sqldevgrid.BootstrapAgent`r`nBundle-ManifestVersion: 2`r`nBundle-SymbolicName: io.github.sqldevgrid.result-grid-font`r`nBundle-Version: 0.12.0`r`nBundle-ClassPath: .`r`nRequire-Bundle: oracle.ide,oracle.ide.ceditor`r`n`r`n"
+$manifest = "Manifest-Version: 1.0`r`nPremain-Class: io.github.sqldevgrid.BootstrapAgent`r`nBundle-ManifestVersion: 2`r`nBundle-SymbolicName: io.github.sqldevgrid.result-grid-font`r`nBundle-Version: 0.14.0`r`nBundle-ClassPath: .`r`nRequire-Bundle: oracle.ide,oracle.ide.ceditor`r`n`r`n"
 [IO.File]::WriteAllText((Join-Path $output 'extension.mf'),$manifest,$utf8)
 $descriptor = @'
 <?xml version="1.0" encoding="UTF-8"?>
-<extension xmlns="http://jcp.org/jsr/198/extension-manifest" id="io.github.sqldevgrid.result-grid-font" version="0.12.0" esdk-version="1.0">
+<extension xmlns="http://jcp.org/jsr/198/extension-manifest" id="io.github.sqldevgrid.result-grid-font" version="0.14.0" esdk-version="1.0">
   <name>SQL Developer Configurator</name><owner>SQL Developer Configurator contributors</owner>
   <feature-member id="sqldeveloper" xmlns="http://xmlns.oracle.com/ide/extension"/>
   <hooks><jdeveloper-hook xmlns="http://xmlns.oracle.com/jdeveloper/1013/extension"><addins><addin>io.github.sqldevgrid.ResultGridFontAddin</addin></addins></jdeveloper-hook></hooks>

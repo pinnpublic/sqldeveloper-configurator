@@ -8,6 +8,19 @@ import jdk.internal.org.objectweb.asm.*;
 public final class EditorTransformer implements ClassFileTransformer {
     static final String BRIDGE = "io/github/sqldevgrid/bridge/EditorBridge";
     public byte[] transform(ClassLoader loader, String name, Class<?> type, ProtectionDomain domain, byte[] bytes) {
+        if ("oracle/javatools/editor/BasicAction".equals(name)) {
+            ClassReader reader=new ClassReader(bytes);ClassWriter writer=new ClassWriter(reader,ClassWriter.COMPUTE_MAXS);
+            reader.accept(new ClassVisitor(Opcodes.ASM8,writer){
+                public MethodVisitor visitMethod(int access,String method,String descriptor,String signature,String[] exceptions){
+                    MethodVisitor next=super.visitMethod(access,method,descriptor,signature,exceptions);
+                    if(!method.equals("getFontHeight")||!descriptor.equals("(Loracle/javatools/editor/BasicEditorPane;)I"))return next;
+                    return new MethodVisitor(Opcodes.ASM8,next){public void visitInsn(int opcode){
+                        if(opcode==Opcodes.IRETURN)mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","rowHeight","(I)I",false);
+                        super.visitInsn(opcode);
+                    }};
+                }
+            },0);return writer.toByteArray();
+        }
         if ("oracle/ide/ceditor/options/FontSizeOptionsPanel".equals(name)) {
             ClassReader reader = new ClassReader(bytes);
             ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
@@ -28,6 +41,7 @@ public final class EditorTransformer implements ClassFileTransformer {
                             }
                             super.visitInsn(opcode);
                         }
+
                     };
                 }
             }, 0);
@@ -70,12 +84,80 @@ public final class EditorTransformer implements ClassFileTransformer {
             System.setProperty("sqldev.font50.nativePreferencesTransformed","true");
             return writer.toByteArray();
         }
+        if ("oracle/javatools/editor/gutter/LineGutterPlugin".equals(name) || "oracle/javatools/editor/folding/CodeFoldingMargin".equals(name)) {
+            ClassReader reader=new ClassReader(bytes);ClassWriter writer=new ClassWriter(reader,ClassWriter.COMPUTE_MAXS);
+            reader.accept(new ClassVisitor(Opcodes.ASM8,writer) {
+                public MethodVisitor visitMethod(int access,String method,String descriptor,String signature,String[] exceptions) {
+                    MethodVisitor target=super.visitMethod(access,method,descriptor,signature,exceptions);
+                    return new MethodVisitor(Opcodes.ASM8,target) {
+                        int heightReads;
+                        public void visitFieldInsn(int opcode,String owner,String field,String desc) {
+                            super.visitFieldInsn(opcode,owner,field,desc);
+                            if(opcode==Opcodes.GETFIELD && field.equals("_fontHeight") && desc.equals("I")) {
+                                heightReads++;
+                                // Paint uses the next two reads for icon size and glyph-centered positioning.
+                                if(!method.equals("paint")||heightReads==1)
+                                    mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","rowHeight","(I)I",false);
+                            }
+                        }
+                        public void visitInsn(int opcode) {
+                            if(method.equals("getFontHeight") && opcode==Opcodes.IRETURN)
+                                mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","rowHeight","(I)I",false);
+                            super.visitInsn(opcode);
+                        }
+                        public void visitMethodInsn(int opcode,String owner,String called,String desc,boolean itf) {
+                            super.visitMethodInsn(opcode,owner,called,desc,itf);
+                            boolean gutter=method.equals("paint")&&called.equals("fillRect")&&owner.equals("java/awt/Graphics");
+                            boolean folding=method.equals("paintComponent")&&called.equals("paintComponent")&&opcode==Opcodes.INVOKESPECIAL;
+                            if(gutter||folding){
+                                mv.visitVarInsn(Opcodes.ALOAD,1);mv.visitVarInsn(Opcodes.ALOAD,0);mv.visitVarInsn(Opcodes.ALOAD,0);
+                                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,gutter?"oracle/javatools/editor/gutter/LineGutterPlugin":"oracle/javatools/editor/folding/CodeFoldingMargin",gutter?"getEditor":"getEditorPane","()Loracle/javatools/editor/BasicEditorPane;",false);
+                                mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","paintGutter","(Ljava/awt/Graphics;Ljavax/swing/JComponent;Ljavax/swing/text/JTextComponent;)V",false);
+                            }
+                        }
+                    };
+                }
+            },0);
+            return writer.toByteArray();
+        }
+        if ("oracle/javatools/editor/BasicEditorUI".equals(name)) {
+            ClassReader reader = new ClassReader(bytes); ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+            reader.accept(new ClassVisitor(Opcodes.ASM8, writer) {
+                public MethodVisitor visitMethod(int access,String method,String descriptor,String signature,String[] exceptions) {
+                    MethodVisitor target=super.visitMethod(access,method,descriptor,signature,exceptions);
+                    if (!method.equals("paintBackground") || !descriptor.equals("(Ljava/awt/Graphics;)V")) return target;
+                    return new MethodVisitor(Opcodes.ASM8,target) {
+                        public void visitInsn(int opcode) {
+                            if(opcode==Opcodes.RETURN) {
+                                mv.visitVarInsn(Opcodes.ALOAD,1);mv.visitVarInsn(Opcodes.ALOAD,0);
+                                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,"oracle/javatools/editor/BasicEditorUI","getComponent","()Ljavax/swing/text/JTextComponent;",false);
+                                mv.visitInsn(Opcodes.ICONST_0);
+                                mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","paint","(Ljava/awt/Graphics;Ljavax/swing/text/JTextComponent;Z)V",false);
+                            }
+                            super.visitInsn(opcode);
+                        }
+                    };
+                }
+            },0);
+            return writer.toByteArray();
+        }
         if (!"oracle/javatools/editor/BasicView".equals(name)) return null;
         System.setProperty("sqldev.font50.viewTransformed", "true");
         ClassReader reader = new ClassReader(bytes); ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         reader.accept(new ClassVisitor(Opcodes.ASM8, writer) {
             public MethodVisitor visitMethod(int access, String method, String descriptor, String signature, String[] exceptions) {
                 MethodVisitor target = super.visitMethod(access, method, descriptor, signature, exceptions);
+                if (method.equals("paintRow") || method.equals("paintSegment"))
+                    return new MethodVisitor(Opcodes.ASM8,target) {
+                        public void visitMethodInsn(int opcode,String owner,String name,String desc,boolean itf) {
+                            if(opcode==Opcodes.INVOKEVIRTUAL && owner.equals("java/awt/Graphics") && name.equals("fillRect") && desc.equals("(IIII)V")) {
+                                mv.visitVarInsn(Opcodes.ALOAD,0);
+                                if(method.equals("paintRow"))mv.visitVarInsn(Opcodes.ALOAD,12);
+                                else {mv.visitVarInsn(Opcodes.ALOAD,3);mv.visitFieldInsn(Opcodes.GETFIELD,"oracle/javatools/editor/BasicView$RenderFragment","backgroundHighlight","Loracle/javatools/editor/highlight/HighlightStyle;");}
+                                mv.visitMethodInsn(Opcodes.INVOKESTATIC,"io/github/sqldevgrid/bridge/NotebookBridge","fillHighlight","(Ljava/awt/Graphics;IIIILjavax/swing/text/View;Ljava/lang/Object;)V",false);
+                            } else super.visitMethodInsn(opcode,owner,name,desc,itf);
+                        }
+                    };
                 if (method.equals("drawTabbedText") && descriptor.equals("(Ljava/awt/Graphics;Ljava/awt/Rectangle;Ljava/awt/FontMetrics;IIII)I"))
                     return new MethodVisitor(Opcodes.ASM8, target) {
                         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
@@ -85,7 +167,9 @@ public final class EditorTransformer implements ClassFileTransformer {
                             } else super.visitMethodInsn(opcode, owner, name, desc, itf);
                         }
                     };
-                if ((method.equals("updateMetrics") || method.equals("updateFolding") || method.equals("rebuildFoldedBlocks")) && descriptor.equals("()V"))
+                // updateMetrics runs on every coordinate query and paint, even when nothing changes.
+                // Layout validity already checks the font and native span; evict only on folding changes.
+                if ((method.equals("updateFolding") || method.equals("rebuildFoldedBlocks")) && descriptor.equals("()V"))
                     return new MethodVisitor(Opcodes.ASM8, target) {
                         public void visitCode() { super.visitCode(); mv.visitVarInsn(Opcodes.ALOAD,0);
                             mv.visitMethodInsn(Opcodes.INVOKESTATIC,BRIDGE,"drop","(Ljavax/swing/text/View;)V",false); }

@@ -24,7 +24,7 @@ public static class EngineTests {
                 string originalEditor = Path.Combine(source, @".font50-backup\editor.jar");
                 if (!File.Exists(originalEditor)) originalEditor = Path.Combine(source, @"ide\extensions\oracle.ide.ceditor.jar");
                 File.Copy(originalEditor, editor, true);
-                string oldLine = "io.github.sqldevgrid.result-grid-font,0.1.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
+                string oldLine = "io.github.sqldevgrid.result-grid-font,0.12.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
                 string baseBundles = "unrelated.bundle,1.0.0,../other.jar,4,false\r\n" + (legacy ? oldLine + "\r\n" : "");
                 File.WriteAllText(bundles, baseBundles, utf8);
                 if (legacy) using (var input = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("result-grid-font-extension.jar"))
@@ -39,11 +39,17 @@ public static class EngineTests {
                 File.WriteAllText(engine.GridSettingsPath, "{\"enabled\":true,\"fontSize\":0}", utf8);
                 Check(engine.ReadOptions(install).GridSize == 34, "legacy follow-editor size 0 imports as 34pt, never 6pt");
                 File.Delete(engine.GridSettingsPath);
+                string originalNotebook = "{\"enabled\":true,\"paper\":8,\"spacing\":15,\"memo\":\"기존 설정\"}";
+                if (legacy) File.WriteAllText(engine.NotebookSettingsPath, originalNotebook, utf8);
                 Directory.CreateDirectory(engine.CachePath(install)); File.WriteAllText(Path.Combine(engine.CachePath(install), "all-resources.dat"), "stale-classes", utf8);
                 string originalExtensionHash = legacy ? Engine.Hash(extension) : "";
                 engine.Install(install, new FontOptions { EditorSize = 50, GridSize = 50, Padding = 8, GridFamily = "Monospaced",
                     SoftWrap = true, HorizontalRules = true, RuleThickness = 50, RuleColor = "#12abef", RuleStyle = "double" });
                 var display = engine.ReadOptions(install);
+                Check(File.ReadAllText(engine.NotebookSettingsPath, utf8).Contains("\"enabled\":true"), "notebook enabled with separate native preference settings");
+                if (legacy) Check(File.ReadAllText(engine.NotebookSettingsPath, utf8) == originalNotebook, "upgrade preserves existing notebook settings");
+                string notebookCustom = "{\"enabled\":true,\"paper\":5,\"spacing\":75,\"memo\":\"한글\"}";
+                File.WriteAllText(engine.NotebookSettingsPath, notebookCustom, utf8);
                 Check(display.SoftWrap && display.HorizontalRules && display.RuleThickness == 50 && display.RuleColor == "#12ABEF" && display.RuleStyle == "double", "50px and new double rule saved and reloaded by installer");
                 Check(engine.ReadOptions(install).EditorSize == 50 && engine.ReadOptions(install).GridSize == 50, "editor and result size saved as 50pt");
                 using (var jar = System.IO.Compression.ZipFile.OpenRead(extension))
@@ -59,8 +65,10 @@ public static class EngineTests {
                     Check(jar.GetEntry("META-INF/extension.xml") == null, "startup agent excludes Oracle extension metadata");
                     Check(jar.GetEntry("io/github/sqldevgrid/NativePreferencesBridge.class") != null,"startup agent includes native preference registry hook");
                     Check(jar.GetEntry("io/github/sqldevgrid/EditorPreferencesPanel.class") == null, "native preferences page stays in Oracle bundle, outside bootstrap agent");
+                    Check(jar.GetEntry("io/github/sqldevgrid/NotebookPreferencesPanel.class") == null, "notebook native page stays outside startup agent");
                 }
                 engine.Install(install, new FontOptions { EditorSize = 34, GridSize = 34, Padding = 10 });
+                Check(File.ReadAllText(engine.NotebookSettingsPath, utf8) == notebookCustom, "reapply preserves custom notebook settings byte-for-byte");
                 Check(engine.ReadOptions(install).EditorSize == 34 && engine.ReadOptions(install).Padding == 10, "reapply updates size and padding");
                 foreach (int requestedPadding in new[] {-20, 0, 30}) {
                     engine.Install(install, new FontOptions { EditorSize = 34, GridSize = 34, Padding = requestedPadding });
@@ -78,6 +86,7 @@ public static class EngineTests {
                 Check(File.ReadAllText(configPath, utf8) == originalConfig, "startup configuration restored byte-for-byte");
                 Check(!File.Exists(engine.GridSettingsPath), "new grid settings removed on restore");
                 Check(!File.Exists(engine.EditorSettingsPath), "new editor settings removed on restore");
+                Check(legacy ? File.ReadAllText(engine.NotebookSettingsPath, utf8) == originalNotebook : !File.Exists(engine.NotebookSettingsPath), "original notebook settings restored or new settings removed");
                 install.Version = "99.0.0";
                 bool rejected = false; try { engine.Install(install, new FontOptions()); } catch (InvalidOperationException) { rejected = true; }
                 Check(rejected && Engine.Hash(editor) == Engine.OriginalHash, "unsupported version rejected without mutations");

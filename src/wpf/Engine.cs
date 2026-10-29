@@ -31,7 +31,7 @@ namespace SqlDeveloperFont50 {
         public const string SupportedVersion = "26.2.0.186.2220";
         public const string OriginalHash = "814A788583F93BF7DE5BB3837462F6A3AF05C7B8FA1AD690003C7179D12151C8";
         public const string BundleId = "io.github.sqldevgrid.result-grid-font";
-        public const string BundleLine = "io.github.sqldevgrid.result-grid-font,0.12.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
+        public const string BundleLine = "io.github.sqldevgrid.result-grid-font,0.14.0,../sqldeveloper/extensions/result-grid-font-extension.jar,4,false";
         public readonly string AppData;
         public readonly string ToolFolder;
         public Action<string> Log = delegate { };
@@ -159,6 +159,7 @@ namespace SqlDeveloperFont50 {
         public string SystemFolder(Installation install) { return Path.Combine(AppData, "SQL Developer", "system" + install.Version); }
         public string GridSettingsPath { get { return Path.Combine(AppData, "SQL Developer Result Grid Font", "settings.json"); } }
         public string EditorSettingsPath { get { return Path.Combine(AppData, "SQL Developer Result Grid Font", "editor-settings.json"); } }
+        public string NotebookSettingsPath { get { return Path.Combine(AppData, "SQL Developer Result Grid Font", "notebook-settings.json"); } }
         public string RuntimePath { get { return Path.Combine(AppData, "SQL Developer Result Grid Font", "runtime-state.json"); } }
         string PreferencesPath(Installation install) { return Path.Combine(SystemFolder(install), "o.sqldeveloper", "product-preferences.xml"); }
         public FontOptions ReadOptions(Installation install) {
@@ -211,7 +212,7 @@ namespace SqlDeveloperFont50 {
                 using (var writer = new StreamWriter(manifest.Open(), new UTF8Encoding(false)))
                     writer.Write("Manifest-Version: 1.0\r\nPremain-Class: io.github.sqldevgrid.BootstrapAgent\r\n\r\n");
                 foreach (var entry in input.Entries) {
-                    if (entry.FullName.StartsWith("io/github/sqldevgrid/EditorPreferencesPanel", StringComparison.Ordinal)) continue;
+                    if (entry.FullName.StartsWith("io/github/sqldevgrid/EditorPreferencesPanel", StringComparison.Ordinal) || entry.FullName.StartsWith("io/github/sqldevgrid/NotebookPreferencesPanel", StringComparison.Ordinal)) continue;
                     if (!entry.FullName.EndsWith(".class", StringComparison.Ordinal) && entry.FullName != "editor-bridge.jar") continue;
                     var copy = output.CreateEntry(entry.FullName);
                     using (var read = entry.Open()) using (var write = copy.Open()) read.CopyTo(write);
@@ -258,6 +259,11 @@ namespace SqlDeveloperFont50 {
             string folder = UserBackupFolder(install);
             if (File.Exists(Path.Combine(folder, "user-state.json"))) {
                 var existing = ReadJson(Path.Combine(folder, "user-state.json"));
+                if (!existing.ContainsKey("hadNotebook")) {
+                    existing["hadNotebook"] = File.Exists(NotebookSettingsPath);
+                    if (File.Exists(NotebookSettingsPath)) File.Copy(NotebookSettingsPath, Path.Combine(folder, "notebook-settings.json"), true);
+                    WriteJson(Path.Combine(folder, "user-state.json"), existing);
+                }
                 if (!existing.ContainsKey("hadEditor")) {
                     existing["hadEditor"] = File.Exists(EditorSettingsPath);
                     if (File.Exists(EditorSettingsPath)) File.Copy(EditorSettingsPath, Path.Combine(folder, "editor-settings.json"), true);
@@ -272,7 +278,9 @@ namespace SqlDeveloperFont50 {
             if (hadGrid) File.Copy(GridSettingsPath, Path.Combine(folder, "settings.json"), true);
             bool hadEditor = File.Exists(EditorSettingsPath);
             if (hadEditor) File.Copy(EditorSettingsPath, Path.Combine(folder, "editor-settings.json"), true);
-            WriteJson(Path.Combine(folder, "user-state.json"), new { hadPreferences = hadPreferences, hadGrid = hadGrid, hadEditor = hadEditor });
+            bool hadNotebook = File.Exists(NotebookSettingsPath);
+            if (hadNotebook) File.Copy(NotebookSettingsPath, Path.Combine(folder, "notebook-settings.json"), true);
+            WriteJson(Path.Combine(folder, "user-state.json"), new { hadPreferences = hadPreferences, hadGrid = hadGrid, hadEditor = hadEditor, hadNotebook = hadNotebook });
         }
         void SaveOptions(Installation install, FontOptions options) {
             if (options.EditorSize < 7 || options.EditorSize > 50 || options.GridSize < 6 || options.GridSize > 50 || options.Padding < -20 || options.Padding > 30)
@@ -322,7 +330,7 @@ namespace SqlDeveloperFont50 {
             } else if (Hash(editor) != OriginalHash) throw new InvalidOperationException("검증한 원본과 다른 편집기 JAR입니다. 이 버전에는 적용할 수 없습니다.");
             string text = File.ReadAllText(bundles, Utf8);
             var registrations = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Where(s => s.StartsWith(BundleId + ",", StringComparison.Ordinal)).ToList();
-            if (registrations.Count > 1 || registrations.Any(s => !Regex.IsMatch(s, "^" + Regex.Escape(BundleId) + @",0\.(?:[1-9]|10|11|12)\.0,\.\./sqldeveloper/extensions/result-grid-font-extension\.jar,4,false$")))
+            if (registrations.Count > 1 || registrations.Any(s => !Regex.IsMatch(s, "^" + Regex.Escape(BundleId) + @",0\.(?:[1-9]|10|11|12|13|14)\.0,\.\./sqldeveloper/extensions/result-grid-font-extension\.jar,4,false$")))
                 throw new InvalidOperationException("기존 결과셋 확장 등록이 예상과 다릅니다.");
             string lineEnding = text.Contains("\r\n") ? "\r\n" : "\n";
             string changed = registrations.Count == 1 ? text.Replace(registrations[0], BundleLine) : text.TrimEnd('\r', '\n') + lineEnding + BundleLine + lineEnding;
@@ -355,6 +363,7 @@ namespace SqlDeveloperFont50 {
                 string prefs = PreferencesPath(install), oldPreferences = File.Exists(prefs) ? File.ReadAllText(prefs, Utf8) : null;
                 string oldGrid = File.Exists(GridSettingsPath) ? File.ReadAllText(GridSettingsPath, Utf8) : null;
                 string oldEditorSettings = File.Exists(EditorSettingsPath) ? File.ReadAllText(EditorSettingsPath, Utf8) : null;
+                string oldNotebookSettings = File.Exists(NotebookSettingsPath) ? File.ReadAllText(NotebookSettingsPath, Utf8) : null;
                 string configPath = Path.Combine(install.Root, @"sqldeveloper\bin\sqldeveloper.conf");
                 string oldConfig = File.Exists(configPath) ? File.ReadAllText(configPath, Utf8) : "";
                 string configBackup = Path.Combine(backup, "sqldeveloper.conf");
@@ -366,7 +375,11 @@ namespace SqlDeveloperFont50 {
                     string agentPath = agent.Replace('\\', '/');
                     AtomicText(configPath, config.TrimEnd('\r', '\n') + "\r\n\r\n# FONT50 AGENT BEGIN\r\nAddVMOption -javaagent:" + agentPath + "\r\n# FONT50 AGENT END\r\n");
                     SaveOptions(install, options);
-                    state["packageVersion"] = "3.4.2"; state["root"] = install.Root; state["installedAt"] = DateTime.Now.ToString("o");
+                    if (!File.Exists(NotebookSettingsPath)) WriteJson(NotebookSettingsPath, new { enabled = true, lines = true, theme = true,
+                        paper = 1, lineStyle = 0, width = 4, gap = 15, spacing = 30, scale = 100, lineOpacity = 38,
+                        patternOpacity = 22, texture = 0, textureOpacity = 40, highlightOpacity = 50,
+                        lineColor = "#7094AD", paperColor = "#FAF7ED", darkPaperColor = "#2B2A28", patternColor = "#899FAB" });
+                    state["packageVersion"] = "3.5.1"; state["root"] = install.Root; state["installedAt"] = DateTime.Now.ToString("o");
                     state["editorPatchedHash"] = Hash(editor); state["extensionPatchedHash"] = Hash(extension); state["bundlePatchedLine"] = BundleLine;
                     state["agentPatchedHash"] = Hash(agent);
                     WriteJson(statePath, state);
@@ -380,6 +393,7 @@ namespace SqlDeveloperFont50 {
                     if (oldPreferences != null) AtomicText(prefs, oldPreferences);
                     if (oldGrid != null) AtomicText(GridSettingsPath, oldGrid); else if (File.Exists(GridSettingsPath)) File.Delete(GridSettingsPath);
                     if (oldEditorSettings != null) AtomicText(EditorSettingsPath, oldEditorSettings); else if (File.Exists(EditorSettingsPath)) File.Delete(EditorSettingsPath);
+                    if (oldNotebookSettings != null) AtomicText(NotebookSettingsPath, oldNotebookSettings); else if (File.Exists(NotebookSettingsPath)) File.Delete(NotebookSettingsPath);
                     if (oldState != null) AtomicText(statePath, oldState); else if (File.Exists(statePath)) File.Delete(statePath);
                     throw;
                 }
@@ -428,6 +442,10 @@ namespace SqlDeveloperFont50 {
                 if (user.ContainsKey("hadEditor")) {
                     if (Convert.ToBoolean(user["hadEditor"])) AtomicCopy(Path.Combine(userFolder, "editor-settings.json"), EditorSettingsPath);
                     else if (File.Exists(EditorSettingsPath)) File.Delete(EditorSettingsPath);
+                }
+                if (user.ContainsKey("hadNotebook")) {
+                    if (Convert.ToBoolean(user["hadNotebook"])) AtomicCopy(Path.Combine(userFolder, "notebook-settings.json"), NotebookSettingsPath);
+                    else if (File.Exists(NotebookSettingsPath)) File.Delete(NotebookSettingsPath);
                 }
                 File.Move(userStatePath, userStatePath + ".restored-" + DateTime.Now.ToString("yyyyMMddHHmmssfff"));
             }

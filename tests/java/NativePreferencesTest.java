@@ -90,7 +90,7 @@ public final class NativePreferencesTest {
                 oracle.ide.panels.Navigable existing=new oracle.ide.panels.Navigable("기존 항목",DefaultTraversablePanel.class);
                 java.util.Collection<?> originalPages=java.util.List.of(existing);
                 java.util.Collection<?> extended=io.github.sqldevgrid.NativePreferencesBridge.extend(originalPages,"/preferences/ceditor",oracle.ide.config.SettingsUIRegistry.class);
-                check(extended.size()==2 && originalPages.size()==1 && extended.contains(existing),"Registry hook did not preserve existing pages and append native preference");
+                check(extended.size()==3 && originalPages.size()==1 && extended.contains(existing),"Registry hook did not preserve existing pages and append native preference");
                 oracle.ide.panels.Navigable added=(oracle.ide.panels.Navigable)extended.stream().filter(n->n!=existing).findFirst().orElseThrow();
                 check(added.getShortLabel().equals("자동 줄바꿈 · 수평선"),"Native registry label differs");
                 check(io.github.sqldevgrid.NativePreferencesBridge.extend(extended,"/preferences/ceditor",oracle.ide.config.SettingsUIRegistry.class)==extended,"Native registry page duplicated");

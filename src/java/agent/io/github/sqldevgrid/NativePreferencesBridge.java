@@ -8,26 +8,33 @@ import java.util.*;
 /** Adds a real Oracle Navigable when SQL Developer requests the editor's preference pages. */
 public final class NativePreferencesBridge {
     public static final String LABEL = "자동 줄바꿈 · 수평선";
-    private static final Map<ClassLoader,Object> NODES = new WeakHashMap<>();
+    public static final String PAPER_LABEL = "노트 배경";
+    private static final Map<ClassLoader,List<Object>> NODES = new WeakHashMap<>();
     public static Collection<?> extend(Collection<?> original, String parent, Class<?> registry) {
         if (!"/preferences/ceditor".equals(parent)) return original;
         try {
             ClassLoader loader=registry.getClassLoader();
             Class<?> navigable=Class.forName("oracle.ide.panels.Navigable",true,loader);
-            for(Object node:original) if(LABEL.equals(navigable.getMethod("getShortLabel").invoke(node))) return original;
-            Object node;
+            Set<String> labels=new HashSet<>();
+            for(Object node:original)labels.add((String)navigable.getMethod("getShortLabel").invoke(node));
+            if(labels.contains(LABEL)&&labels.contains(PAPER_LABEL))return original;
+            List<Object> nodes;
             synchronized(NODES) {
-                node=NODES.get(loader);
-                if(node==null) {
+                nodes=NODES.get(loader);
+                if(nodes==null) {
                     Path agent=Path.of(NativePreferencesBridge.class.getProtectionDomain().getCodeSource().getLocation().toURI());
                     Path jar=agent.resolveSibling("result-grid-font-extension.jar");
                     URLClassLoader panels=new URLClassLoader(new java.net.URL[]{jar.toUri().toURL()},loader);
-                    Class<?> panel=Class.forName("io.github.sqldevgrid.EditorPreferencesPanel",true,panels);
-                    node=navigable.getConstructor(String.class,Class.class).newInstance(LABEL,panel);
-                    NODES.put(loader,node);
+                    nodes=new ArrayList<>();
+                    for(String[] entry:new String[][]{{LABEL,"EditorPreferencesPanel"},{PAPER_LABEL,"NotebookPreferencesPanel"}}) {
+                        Class<?> panel=Class.forName("io.github.sqldevgrid."+entry[1],true,panels);
+                        nodes.add(navigable.getConstructor(String.class,Class.class).newInstance(entry[0],panel));
+                    }
+                    NODES.put(loader,nodes);
                 }
             }
-            ArrayList<Object> result=new ArrayList<>(original);result.add(node);
+            ArrayList<Object> result=new ArrayList<>(original);
+            for(Object node:nodes)if(!labels.contains((String)navigable.getMethod("getShortLabel").invoke(node)))result.add(node);
             System.setProperty("sqldev.font50.nativePreferencesHook","true");
             return Collections.unmodifiableCollection(result);
         } catch(Throwable error) {

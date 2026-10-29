@@ -14,6 +14,7 @@ try {
     [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$binary,'SQLDeveloperConfigurator.exe') | Out-Null
     [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $repo 'LICENSE'),'LICENSE') | Out-Null
     [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $repo 'THIRD_PARTY_NOTICES.md'),'THIRD_PARTY_NOTICES.md') | Out-Null
+    [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $repo 'docs\ECLIPSE-PAPER-LICENSE.txt'),'docs/ECLIPSE-PAPER-LICENSE.txt') | Out-Null
     [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $repo 'docs\QUICKSTART.md'),'QUICKSTART.md') | Out-Null
 } finally { $zip.Dispose() }
 $lines = foreach ($file in @($binary,$path)) { (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()+'  '+[IO.Path]::GetFileName($file) }

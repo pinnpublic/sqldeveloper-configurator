@@ -22,6 +22,7 @@ public final class BootstrapAgent {
             Path jar = folder.resolve("editor-bridge-" + hash + ".jar");
             if (!Files.exists(jar)) Files.write(jar, helper);
             value.appendToBootstrapClassLoaderSearch(new java.util.jar.JarFile(jar.toFile()));
+            System.setProperty("sqldev.font50.bridgeJar",jar.toString());
             value.redefineModule(Object.class.getModule(), java.util.Set.of(),
                 java.util.Map.of("jdk.internal.org.objectweb.asm", java.util.Set.of(BootstrapAgent.class.getModule())), java.util.Map.of(), java.util.Set.of(), java.util.Map.of());
             value.addTransformer((java.lang.instrument.ClassFileTransformer)Class.forName("io.github.sqldevgrid.EditorTransformer").getConstructor().newInstance());
@@ -31,7 +32,7 @@ public final class BootstrapAgent {
         }
         try {
             Path folder = GridSettings.path().getParent(); Files.createDirectories(folder);
-            Files.writeString(folder.resolve("agent-started.json"), "{\"version\":\"0.12.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + System.currentTimeMillis() + "}", StandardCharsets.UTF_8);
+            Files.writeString(folder.resolve("agent-started.json"), "{\"version\":\"0.14.0\",\"pid\":" + ProcessHandle.current().pid() + ",\"timestamp\":" + System.currentTimeMillis() + "}", StandardCharsets.UTF_8);
         } catch (Exception ignored) { }
         start();
         String testClasses = System.getProperty("sqldev.font50.selftest.classes");
